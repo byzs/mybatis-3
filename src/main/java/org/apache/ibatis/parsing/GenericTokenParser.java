@@ -17,10 +17,18 @@ package org.apache.ibatis.parsing;
 
 /**
  * @author Clinton Begin
+ * 通用token解析器
  */
 public class GenericTokenParser {
 
+
+  /**
+   * token前缀
+   */
   private final String openToken;
+  /**
+   * token后缀
+   */
   private final String closeToken;
   private final TokenHandler handler;
 
@@ -31,14 +39,16 @@ public class GenericTokenParser {
   }
 
   public String parse(String text) {
+    // 空文本直接返回
     if (text == null || text.isEmpty()) {
       return "";
     }
-    // search open token
+    // 不存在token前缀直接返回
     int start = text.indexOf(openToken);
     if (start == -1) {
       return text;
     }
+    // 转换为char 数组便于解析
     char[] src = text.toCharArray();
     int offset = 0;
     final StringBuilder builder = new StringBuilder();
