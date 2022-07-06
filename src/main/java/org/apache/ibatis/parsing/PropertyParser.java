@@ -52,14 +52,27 @@ public class PropertyParser {
   }
 
   public static String parse(String string, Properties variables) {
+    // 1.创建 动态变量解析器
     VariableTokenHandler handler = new VariableTokenHandler(variables);
+    // 2.创建 通用解析器
     GenericTokenParser parser = new GenericTokenParser("${", "}", handler);
+    // 3.解析
     return parser.parse(string);
   }
 
+
   private static class VariableTokenHandler implements TokenHandler {
+    /**
+     * Properties变量
+     */
     private final Properties variables;
+    /**
+     * 是否开启默认值功能。默认为 {@link #ENABLE_DEFAULT_VALUE}
+     */
     private final boolean enableDefaultValue;
+    /**
+     * 默认分隔符。 默认为 {@link #KEY_DEFAULT_VALUE_SEPARATOR}
+     */
     private final String defaultValueSeparator;
 
     private VariableTokenHandler(Properties variables) {
@@ -74,23 +87,29 @@ public class PropertyParser {
 
     @Override
     public String handleToken(String content) {
+
       if (variables != null) {
         String key = content;
+        // 开启默认值功能处理
         if (enableDefaultValue) {
+          // 根据分割符获取 默认值
           final int separatorIndex = content.indexOf(defaultValueSeparator);
           String defaultValue = null;
           if (separatorIndex >= 0) {
             key = content.substring(0, separatorIndex);
             defaultValue = content.substring(separatorIndex + defaultValueSeparator.length());
           }
+          // 有默认值，优先替换，不存在则返回默认值
           if (defaultValue != null) {
             return variables.getProperty(key, defaultValue);
           }
         }
+        // Properties 存在 指定key,返回该 value
         if (variables.containsKey(key)) {
           return variables.getProperty(key);
         }
       }
+      // varables 为 null 直接返回
       return "${" + content + "}";
     }
   }
