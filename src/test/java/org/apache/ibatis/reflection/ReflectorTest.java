@@ -18,6 +18,8 @@ package org.apache.ibatis.reflection;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
@@ -217,5 +219,17 @@ public class ReflectorTest {
     ReflectorFactory reflectorFactory = new DefaultReflectorFactory();
     Reflector reflector = reflectorFactory.findForClass(Bean.class);
     assertTrue((Boolean)reflector.getGetInvoker("bool").invoke(new Bean(), new Byte[0]));
+  }
+
+  @Test
+  public void computeIfAbsent(){
+
+    HashMap<String,ArrayList> hashMap = new HashMap<>();
+    hashMap.put("aa",new ArrayList(){{add("a"); add("b");}});
+
+    List<String> list = hashMap.computeIfAbsent("k", k -> new ArrayList<String>(){{add("1");add("2");}});
+    list.forEach(p -> {
+      System.out.println(p);
+    });
   }
 }
