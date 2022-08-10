@@ -21,6 +21,8 @@ import org.apache.ibatis.reflection.Reflector;
 
 /**
  * @author Clinton Begin
+ *
+ * 获取Field调用者
  */
 public class GetFieldInvoker implements Invoker {
   private final Field field;
@@ -29,6 +31,9 @@ public class GetFieldInvoker implements Invoker {
     this.field = field;
   }
 
+  /**
+   * 获取属性
+   */
   @Override
   public Object invoke(Object target, Object[] args) throws IllegalAccessException {
     try {
@@ -43,6 +48,9 @@ public class GetFieldInvoker implements Invoker {
     }
   }
 
+  /**
+   * 返回类型
+   */
   @Override
   public Class<?> getType() {
     return field.getType();

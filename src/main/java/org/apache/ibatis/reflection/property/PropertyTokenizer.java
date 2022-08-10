@@ -19,14 +19,30 @@ import java.util.Iterator;
 
 /**
  * @author Clinton Begin
+ * 分词器
  */
 public class PropertyTokenizer implements Iterator<PropertyTokenizer> {
+  /**
+   * 当前字符串
+   */
   private String name;
+  /**
+   * {@link #name}的索引
+   */
   private final String indexedName;
+  /**
+   * 编号
+   * 对于数组 name[0] ，则 index = 0
+   * 对于 Map map[key] ，则 index = key
+   */
   private String index;
+  /**
+   * 剩余字符串
+   */
   private final String children;
 
   public PropertyTokenizer(String fullname) {
+    // 1 采用‘.’进行分割, 分别初始化 name 和 children
     int delim = fullname.indexOf('.');
     if (delim > -1) {
       name = fullname.substring(0, delim);
@@ -35,7 +51,9 @@ public class PropertyTokenizer implements Iterator<PropertyTokenizer> {
       name = fullname;
       children = null;
     }
+    // 2 记录当前 name
     indexedName = name;
+    // 3 name 中包含 '[', 修改name,记录index
     delim = name.indexOf('[');
     if (delim > -1) {
       index = name.substring(delim + 1, name.length() - 1);

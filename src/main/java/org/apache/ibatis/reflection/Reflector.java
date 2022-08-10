@@ -355,6 +355,7 @@ public class Reflector {
     Field[] fields = clazz.getDeclaredFields();
     // 遍历
     for (Field field : fields) {
+      // 添加到 setMethods setTypes
       if (!setMethods.containsKey(field.getName())) {
         // issue #379 - removed the check for final because JDK 1.5 allows
         // modification of final fields through reflection (JSR-133). (JGB)
@@ -364,26 +365,34 @@ public class Reflector {
           addSetField(field);
         }
       }
+      // 添加到 getMethods getTypes
       if (!getMethods.containsKey(field.getName())) {
         addGetField(field);
       }
     }
+    // 递归 父类
     if (clazz.getSuperclass() != null) {
       addFields(clazz.getSuperclass());
     }
   }
 
   private void addSetField(Field field) {
+    // 判断合理性
     if (isValidPropertyName(field.getName())) {
+      // 添加到 setMethods 中
       setMethods.put(field.getName(), new SetFieldInvoker(field));
+      // 添加到 setTypes 中
       Type fieldType = TypeParameterResolver.resolveFieldType(field, type);
       setTypes.put(field.getName(), typeToClass(fieldType));
     }
   }
 
   private void addGetField(Field field) {
+    // 判断合理性
     if (isValidPropertyName(field.getName())) {
+      // 添加到 getMethods 中
       getMethods.put(field.getName(), new GetFieldInvoker(field));
+      // 添加到 getTypes 中
       Type fieldType = TypeParameterResolver.resolveFieldType(field, type);
       getTypes.put(field.getName(), typeToClass(fieldType));
     }

@@ -26,6 +26,7 @@ import org.apache.ibatis.reflection.property.PropertyTokenizer;
 
 /**
  * @author Clinton Begin
+ * MapWrapper 和 BeanWrapper 的大体逻辑是一样的
  */
 public class MapWrapper extends BaseWrapper {
 
