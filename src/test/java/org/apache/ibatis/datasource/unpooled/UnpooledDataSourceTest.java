@@ -21,7 +21,9 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.Driver;
 import java.sql.DriverManager;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -64,6 +66,20 @@ public class UnpooledDataSourceTest {
       count++;
     }
     return count;
+  }
+
+  final List<String> idleConnections = new ArrayList<>();
+
+  @Test
+  public void removeIndex(){
+
+    idleConnections.add("sss");
+    idleConnections.add("ddd");
+    idleConnections.add("aaa");
+    System.out.println(idleConnections.size());
+    String str = idleConnections.remove(0);
+    System.out.println(idleConnections.size());
+
   }
 
 }

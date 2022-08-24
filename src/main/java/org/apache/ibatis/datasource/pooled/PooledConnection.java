@@ -28,17 +28,50 @@ import org.apache.ibatis.reflection.ExceptionUtil;
  */
 class PooledConnection implements InvocationHandler {
 
+  /**
+   * 关闭 Connection 方法名
+   */
   private static final String CLOSE = "close";
+  /**
+   * JDK Proxy 的接口
+   */
   private static final Class<?>[] IFACES = new Class<?>[] { Connection.class };
 
+  /**
+   * 对象标识
+   */
   private final int hashCode;
+  /**
+   * 所属的 PooledDataSource 对象
+   */
   private final PooledDataSource dataSource;
+  /**
+   * 真实的 Connection 连接
+   */
   private final Connection realConnection;
+  /**
+   * 代理的 Connection 连接
+   */
   private final Connection proxyConnection;
+  /**
+   * 从连接池中，获取走的时间戳
+   */
   private long checkoutTimestamp;
+  /**
+   * 对象创建时间
+   */
   private long createdTimestamp;
+  /**
+   * 最后更新时间
+   */
   private long lastUsedTimestamp;
+  /**
+   * 连接的标识
+   */
   private int connectionTypeCode;
+  /**
+   * 是否有效
+   */
   private boolean valid;
 
   /**
@@ -232,16 +265,19 @@ class PooledConnection implements InvocationHandler {
   @Override
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     String methodName = method.getName();
+    // 判断是否为 CLOSE 方法,将连接放回到连接池中，避免连接被关闭
     if (CLOSE.hashCode() == methodName.hashCode() && CLOSE.equals(methodName)) {
       dataSource.pushConnection(this);
       return null;
     }
     try {
+      // 判断非 Object 的方法，则先检查连接是否可用
       if (!Object.class.equals(method.getDeclaringClass())) {
         // issue #579 toString() should never fail
         // throw an SQLException instead of a Runtime
         checkConnection();
       }
+      // 反射调用对应的方法
       return method.invoke(realConnection, args);
     } catch (Throwable t) {
       throw ExceptionUtil.unwrapThrowable(t);
