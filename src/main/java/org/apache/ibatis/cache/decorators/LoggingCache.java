@@ -23,12 +23,26 @@ import org.apache.ibatis.logging.LogFactory;
 
 /**
  * @author Clinton Begin
+ * 支持日志打印的cache
+ *   .主要是在获取缓存时，添加了对获取次数以及命中率的操作
  */
 public class LoggingCache implements Cache {
 
+  /**
+   * Mybatis Log 对象
+   */
   private final Log log;
+  /**
+   * 装饰的 Cache对象
+   */
   private final Cache delegate;
+  /**
+   * 统计请求缓存的次数
+   */
   protected int requests = 0;
+  /**
+   * 统计命中缓存的次数
+   */
   protected int hits = 0;
 
   public LoggingCache(Cache delegate) {
@@ -53,11 +67,15 @@ public class LoggingCache implements Cache {
 
   @Override
   public Object getObject(Object key) {
+    // 请求缓存次数增加
     requests++;
+    // 获取缓存
     final Object value = delegate.getObject(key);
+    // 获取的缓存不为null 代表 此次缓存命中
     if (value != null) {
       hits++;
     }
+    // 打印该缓存的命中率
     if (log.isDebugEnabled()) {
       log.debug("Cache Hit Ratio [" + getId() + "]: " + getHitRatio());
     }
@@ -89,6 +107,9 @@ public class LoggingCache implements Cache {
     return delegate.equals(obj);
   }
 
+  /**
+   * 获取命中率
+   */
   private double getHitRatio() {
     return (double) hits / (double) requests;
   }

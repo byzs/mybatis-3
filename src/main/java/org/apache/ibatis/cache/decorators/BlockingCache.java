@@ -32,12 +32,21 @@ import org.apache.ibatis.cache.CacheException;
  * This way, other threads will wait until this element is filled instead of hitting the database.
  *
  * @author Eduardo Macarron
- *
+ * 可阻塞的缓存
  */
 public class BlockingCache implements Cache {
 
+  /**
+   * 阻塞等待时间
+   */
   private long timeout;
+  /**
+   * 装饰的 Cache 对象
+   */
   private final Cache delegate;
+  /**
+   * 缓存键与 ReentrantLock 对象的映射
+   */
   private final ConcurrentHashMap<Object, ReentrantLock> locks;
 
   public BlockingCache(Cache delegate) {
@@ -66,7 +75,9 @@ public class BlockingCache implements Cache {
 
   @Override
   public Object getObject(Object key) {
+    // 获取锁
     acquireLock(key);
+    // 获取值
     Object value = delegate.getObject(key);
     if (value != null) {
       releaseLock(key);
@@ -77,6 +88,7 @@ public class BlockingCache implements Cache {
   @Override
   public Object removeObject(Object key) {
     // despite of its name, this method is called only to release locks
+    // 释放锁
     releaseLock(key);
     return null;
   }
@@ -91,12 +103,18 @@ public class BlockingCache implements Cache {
     return null;
   }
 
+  /**
+   * 获取锁对象
+   */
   private ReentrantLock getLockForKey(Object key) {
+    // 根据Key获取锁对象,不存在则新建一个
     return locks.computeIfAbsent(key, k -> new ReentrantLock());
   }
 
   private void acquireLock(Object key) {
+    // 获取锁对象
     Lock lock = getLockForKey(key);
+    // 尝试获取锁,超时为止
     if (timeout > 0) {
       try {
         boolean acquired = lock.tryLock(timeout, TimeUnit.MILLISECONDS);
@@ -107,12 +125,18 @@ public class BlockingCache implements Cache {
         throw new CacheException("Got interrupted while trying to acquire lock for key " + key, e);
       }
     } else {
+      // 释放锁
       lock.lock();
     }
   }
 
+  /**
+   * 释放锁
+   */
   private void releaseLock(Object key) {
+    // 获取锁对象
     ReentrantLock lock = locks.get(key);
+    // 如果当前线程持有,进行释放
     if (lock.isHeldByCurrentThread()) {
       lock.unlock();
     }

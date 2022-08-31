@@ -28,11 +28,24 @@ import org.apache.ibatis.cache.Cache;
  * Thanks to Dr. Heinz Kabutz for his guidance here.
  *
  * @author Clinton Begin
+ * 软引用缓存装饰器 与 弱引用大致相同
  */
 public class SoftCache implements Cache {
+  /**
+   * 强引用,还没有被GC回收的集合
+   */
   private final Deque<Object> hardLinksToAvoidGarbageCollection;
+  /**
+   * 已经被GC回收的集合
+   */
   private final ReferenceQueue<Object> queueOfGarbageCollectedEntries;
+  /**
+   * 修饰Cache
+   */
   private final Cache delegate;
+  /**
+   * 已被回收集合的大小
+   */
   private int numberOfHardLinks;
 
   public SoftCache(Cache delegate) {
@@ -106,6 +119,9 @@ public class SoftCache implements Cache {
     return null;
   }
 
+  /**
+   * 删除已经被GC的缓存
+   */
   private void removeGarbageCollectedItems() {
     SoftEntry sv;
     while ((sv = (SoftEntry) queueOfGarbageCollectedEntries.poll()) != null) {

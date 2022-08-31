@@ -25,15 +25,26 @@ import org.apache.ibatis.cache.Cache;
  * Lru (least recently used) cache decorator
  *
  * @author Clinton Begin
+ * 最近最少使用淘汰Cache实现类
  */
 public class LruCache implements Cache {
 
+  /**
+   * 修饰缓存Cache
+   */
   private final Cache delegate;
+  /**
+   * 基于 LinkedHashMap 实现淘汰机制
+   */
   private Map<Object, Object> keyMap;
+  /**
+   * 最老的键，即要被淘汰的
+   */
   private Object eldestKey;
 
   public LruCache(Cache delegate) {
     this.delegate = delegate;
+    // 默认大小 1024
     setSize(1024);
   }
 
@@ -48,9 +59,12 @@ public class LruCache implements Cache {
   }
 
   public void setSize(final int size) {
+    // 构建LinkedHashMap 采用访问顺序构建
     keyMap = new LinkedHashMap<Object, Object>(size, .75F, true) {
       private static final long serialVersionUID = 4267176411845948333L;
 
+      // LinkedHashMap自带的判断是否删除最老的元素方法，默认返回false，即不删除老数据
+      // 我们要做的就是重写这个方法，当满足一定条件时删除老数据
       @Override
       protected boolean removeEldestEntry(Map.Entry<Object, Object> eldest) {
         boolean tooBig = size() > size;
@@ -92,6 +106,7 @@ public class LruCache implements Cache {
 
   private void cycleKeyList(Object key) {
     keyMap.put(key, key);
+    // 满足条件进行过期
     if (eldestKey != null) {
       delegate.removeObject(eldestKey);
       eldestKey = null;
