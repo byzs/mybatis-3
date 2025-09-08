@@ -1,5 +1,5 @@
-/**
- *    Copyright 2009-2018 the original author or authors.
+/*
+ *    Copyright 2009-2021 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -32,15 +32,15 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
 import org.junit.jupiter.api.Test;
 
-public class SameIdTest {
+class SameIdTest {
 
   @Test
-  public void testCrossReferenceXmlConfig() throws Exception {
+  void testCrossReferenceXmlConfig() throws Exception {
     testCrossReference(getSqlSessionFactoryXmlConfig());
   }
 
   @Test
-  public void testCrossReferenceJavaConfig() throws Exception {
+  void testCrossReferenceJavaConfig() throws Exception {
     testCrossReference(getSqlSessionFactoryJavaConfig());
   }
 
@@ -57,8 +57,8 @@ public class SameIdTest {
 
       SameIdPetMapper petMapper = sqlSession.getMapper(SameIdPetMapper.class);
       Pet pet2 = petMapper.select(3);
-      assertEquals((Integer)3, pet2.getId());
-      assertEquals((Integer)2, pet2.getOwner().getId());
+      assertEquals((Integer) 3, pet2.getId());
+      assertEquals((Integer) 2, pet2.getOwner().getId());
     }
   }
 
@@ -75,8 +75,8 @@ public class SameIdTest {
 
   private SqlSessionFactory getSqlSessionFactoryJavaConfig() throws Exception {
     Configuration configuration = new Configuration();
-    Environment environment = new Environment("development", new JdbcTransactionFactory(), new UnpooledDataSource(
-        "org.hsqldb.jdbcDriver", "jdbc:hsqldb:mem:xmlextref", null));
+    Environment environment = new Environment("development", new JdbcTransactionFactory(),
+        new UnpooledDataSource("org.hsqldb.jdbcDriver", "jdbc:hsqldb:mem:xmlextref", null));
     configuration.setEnvironment(environment);
     configuration.addMapper(SameIdPersonMapper.class);
     configuration.addMapper(SameIdPetMapper.class);
@@ -90,7 +90,7 @@ public class SameIdTest {
 
   private static void initDb(SqlSessionFactory sqlSessionFactory) throws IOException, SQLException {
     BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-            "org/apache/ibatis/submitted/xml_external_ref/CreateDB.sql");
+        "org/apache/ibatis/submitted/xml_external_ref/CreateDB.sql");
   }
 
 }

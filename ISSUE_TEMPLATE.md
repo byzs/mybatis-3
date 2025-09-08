@@ -1,12 +1,15 @@
 <!--
 ❌ 不要在这里问问题❗️
-⭕️ 请将您的问题发送到邮件列表
-請用英文寫
+⭕️ 请使用英文将您的问题发送到邮件列表： 
 https://groups.google.com/group/mybatis-user
+或在 Stack Overflow 进行提问，并带上 'mybatis' 标签：
+https://stackoverflow.com/questions/ask?tags=mybatis
+在这里的提问将会被直接关闭。
 
 Question?
 ======================
 Please use the mailing list. http://groups.google.com/group/mybatis-user
+Or Stack Overflow with 'mybatis' tag. https://stackoverflow.com/questions/ask?tags=mybatis
 Questions on this tracker will be closed without comment.
 
 Bug report?

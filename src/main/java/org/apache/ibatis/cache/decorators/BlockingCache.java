@@ -1,5 +1,5 @@
-/**
- *    Copyright 2009-2018 the original author or authors.
+/*
+ *    Copyright 2009-2022 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,38 +16,29 @@
 package org.apache.ibatis.cache.decorators;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.cache.CacheException;
 
 /**
- * Simple blocking decorator
+ * <p>Simple blocking decorator
  *
- * Simple and inefficient version of EhCache's BlockingCache decorator.
+ * <p>Simple and inefficient version of EhCache's BlockingCache decorator.
  * It sets a lock over a cache key when the element is not found in cache.
  * This way, other threads will wait until this element is filled instead of hitting the database.
  *
+ * <p>By its nature, this implementation can cause deadlock when used incorrectly.
+ *
  * @author Eduardo Macarron
- * 可阻塞的缓存
+ *
  */
 public class BlockingCache implements Cache {
 
-  /**
-   * 阻塞等待时间
-   */
   private long timeout;
-  /**
-   * 装饰的 Cache 对象
-   */
   private final Cache delegate;
-  /**
-   * 缓存键与 ReentrantLock 对象的映射
-   */
-  private final ConcurrentHashMap<Object, ReentrantLock> locks;
+  private final ConcurrentHashMap<Object, CountDownLatch> locks;
 
   public BlockingCache(Cache delegate) {
     this.delegate = delegate;
@@ -75,9 +66,7 @@ public class BlockingCache implements Cache {
 
   @Override
   public Object getObject(Object key) {
-    // 获取锁
     acquireLock(key);
-    // 获取值
     Object value = delegate.getObject(key);
     if (value != null) {
       releaseLock(key);
@@ -87,8 +76,7 @@ public class BlockingCache implements Cache {
 
   @Override
   public Object removeObject(Object key) {
-    // despite of its name, this method is called only to release locks
-    // 释放锁
+    // despite its name, this method is called only to release locks
     releaseLock(key);
     return null;
   }
@@ -98,48 +86,35 @@ public class BlockingCache implements Cache {
     delegate.clear();
   }
 
-  @Override
-  public ReadWriteLock getReadWriteLock() {
-    return null;
-  }
-
-  /**
-   * 获取锁对象
-   */
-  private ReentrantLock getLockForKey(Object key) {
-    // 根据Key获取锁对象,不存在则新建一个
-    return locks.computeIfAbsent(key, k -> new ReentrantLock());
-  }
-
   private void acquireLock(Object key) {
-    // 获取锁对象
-    Lock lock = getLockForKey(key);
-    // 尝试获取锁,超时为止
-    if (timeout > 0) {
+    CountDownLatch newLatch = new CountDownLatch(1);
+    while (true) {
+      CountDownLatch latch = locks.putIfAbsent(key, newLatch);
+      if (latch == null) {
+        break;
+      }
       try {
-        boolean acquired = lock.tryLock(timeout, TimeUnit.MILLISECONDS);
-        if (!acquired) {
-          throw new CacheException("Couldn't get a lock in " + timeout + " for the key " +  key + " at the cache " + delegate.getId());
+        if (timeout > 0) {
+          boolean acquired = latch.await(timeout, TimeUnit.MILLISECONDS);
+          if (!acquired) {
+            throw new CacheException(
+                "Couldn't get a lock in " + timeout + " for the key " + key + " at the cache " + delegate.getId());
+          }
+        } else {
+          latch.await();
         }
       } catch (InterruptedException e) {
         throw new CacheException("Got interrupted while trying to acquire lock for key " + key, e);
       }
-    } else {
-      // 释放锁
-      lock.lock();
     }
   }
 
-  /**
-   * 释放锁
-   */
   private void releaseLock(Object key) {
-    // 获取锁对象
-    ReentrantLock lock = locks.get(key);
-    // 如果当前线程持有,进行释放
-    if (lock.isHeldByCurrentThread()) {
-      lock.unlock();
+    CountDownLatch latch = locks.remove(key);
+    if (latch == null) {
+      throw new IllegalStateException("Detected an attempt at releasing unacquired lock. This should never happen.");
     }
+    latch.countDown();
   }
 
   public long getTimeout() {

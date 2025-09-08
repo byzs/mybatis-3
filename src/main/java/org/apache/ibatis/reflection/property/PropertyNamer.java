@@ -1,5 +1,5 @@
-/**
- *    Copyright 2009-2015 the original author or authors.
+/*
+ *    Copyright 2009-2021 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -58,21 +58,21 @@ public final class PropertyNamer {
    * 判断是否为 get , set , is 方法
    */
   public static boolean isProperty(String name) {
-    return name.startsWith("get") || name.startsWith("set") || name.startsWith("is");
+    return isGetter(name) || isSetter(name);
   }
 
   /**
    * 判断是否为 get,is 方法
    */
   public static boolean isGetter(String name) {
-    return name.startsWith("get") || name.startsWith("is");
+    return (name.startsWith("get") && name.length() > 3) || (name.startsWith("is") && name.length() > 2);
   }
 
   /**
    * 判断是否为 set方法
    */
   public static boolean isSetter(String name) {
-    return name.startsWith("set");
+    return name.startsWith("set") && name.length() > 3;
   }
 
 }

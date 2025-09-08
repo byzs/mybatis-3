@@ -1,5 +1,5 @@
-/**
- *    Copyright 2009-2018 the original author or authors.
+/*
+ *    Copyright 2009-2021 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@ package org.apache.ibatis.submitted.complex_property;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.io.Reader;
+import java.util.Calendar;
+
 import org.apache.ibatis.BaseDataTest;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
@@ -25,14 +28,11 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.Reader;
-import java.util.Calendar;
-
-public class ComponentTest {
+class ComponentTest {
   private static SqlSessionFactory sqlSessionFactory;
 
   @BeforeAll
-  public static void setup() throws Exception {
+  static void setup() throws Exception {
     String resource = "org/apache/ibatis/submitted/complex_property/Configuration.xml";
     Reader reader = Resources.getResourceAsReader(resource);
     sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
@@ -42,7 +42,7 @@ public class ComponentTest {
   }
 
   @Test
-  public void shouldInsertNestedPasswordFieldOfComplexType() throws Exception {
+  void shouldInsertNestedPasswordFieldOfComplexType() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       //Create User
       User user = new User();
@@ -54,7 +54,7 @@ public class ComponentTest {
       sqlSession.insert("User.insert", user);
 
       // Retrieve User
-      user = (User) sqlSession.selectOne("User.find", user.getId());
+      user = sqlSession.selectOne("User.find", user.getId());
 
       assertNotNull(user.getId());
 

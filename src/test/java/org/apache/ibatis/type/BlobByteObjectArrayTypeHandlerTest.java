@@ -1,5 +1,5 @@
-/**
- *    Copyright 2009-2018 the original author or authors.
+/*
+ *    Copyright 2009-2021 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,18 +15,18 @@
  */
 package org.apache.ibatis.type;
 
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-
-import java.io.*;
-import java.sql.Blob;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
-public class BlobByteObjectArrayTypeHandlerTest extends BaseTypeHandlerTest {
+import java.io.*;
+import java.sql.Blob;
+
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+
+class BlobByteObjectArrayTypeHandlerTest extends BaseTypeHandlerTest {
 
   private static final TypeHandler<Byte[]> TYPE_HANDLER = new BlobByteObjectArrayTypeHandler();
 
@@ -54,7 +54,7 @@ public class BlobByteObjectArrayTypeHandlerTest extends BaseTypeHandlerTest {
   public void shouldGetResultFromResultSetByName() throws Exception {
     byte[] byteArray = new byte[] { 1, 2 };
     when(rs.getBlob("column")).thenReturn(blob);
-    when(blob.length()).thenReturn((long)byteArray.length);
+    when(blob.length()).thenReturn((long) byteArray.length);
     when(blob.getBytes(1, 2)).thenReturn(byteArray);
     assertThat(TYPE_HANDLER.getResult(rs, "column")).isEqualTo(new Byte[] { 1, 2 });
 
@@ -72,7 +72,7 @@ public class BlobByteObjectArrayTypeHandlerTest extends BaseTypeHandlerTest {
   public void shouldGetResultFromResultSetByPosition() throws Exception {
     byte[] byteArray = new byte[] { 1, 2 };
     when(rs.getBlob(1)).thenReturn(blob);
-    when(blob.length()).thenReturn((long)byteArray.length);
+    when(blob.length()).thenReturn((long) byteArray.length);
     when(blob.getBytes(1, 2)).thenReturn(byteArray);
     assertThat(TYPE_HANDLER.getResult(rs, 1)).isEqualTo(new Byte[] { 1, 2 });
   }
@@ -89,7 +89,7 @@ public class BlobByteObjectArrayTypeHandlerTest extends BaseTypeHandlerTest {
   public void shouldGetResultFromCallableStatement() throws Exception {
     byte[] byteArray = new byte[] { 1, 2 };
     when(cs.getBlob(1)).thenReturn(blob);
-    when(blob.length()).thenReturn((long)byteArray.length);
+    when(blob.length()).thenReturn((long) byteArray.length);
     when(blob.getBytes(1, 2)).thenReturn(byteArray);
     assertThat(TYPE_HANDLER.getResult(cs, 1)).isEqualTo(new Byte[] { 1, 2 });
   }

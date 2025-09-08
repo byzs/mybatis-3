@@ -1,5 +1,5 @@
-/**
- *    Copyright 2009-2019 the original author or authors.
+/*
+ *    Copyright 2009-2021 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class ResultSetLoggerTest {
+class ResultSetLoggerTest {
 
   @Mock
   private ResultSet rs;
@@ -41,7 +41,7 @@ public class ResultSetLoggerTest {
   @Mock
   private ResultSetMetaData metaData;
 
-  public void setup(int type) throws SQLException {
+  private void setup(int type) throws SQLException {
     when(rs.next()).thenReturn(true);
     when(rs.getMetaData()).thenReturn(metaData);
     when(metaData.getColumnCount()).thenReturn(1);
@@ -53,14 +53,14 @@ public class ResultSetLoggerTest {
   }
 
   @Test
-  public void shouldNotPrintBlobs() throws SQLException {
+  void shouldNotPrintBlobs() throws SQLException {
     setup(Types.LONGNVARCHAR);
     verify(log).trace("<==    Columns: ColumnName");
     verify(log).trace("<==        Row: <<BLOB>>");
   }
 
   @Test
-  public void shouldPrintVarchars() throws SQLException {
+  void shouldPrintVarchars() throws SQLException {
     when(rs.getString(1)).thenReturn("value");
     setup(Types.VARCHAR);
     verify(log).trace("<==    Columns: ColumnName");

@@ -1,5 +1,5 @@
-/**
- *    Copyright 2009-2018 the original author or authors.
+/*
+ *    Copyright 2009-2022 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,14 +19,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.jupiter.api.Test;
-
 import java.math.BigDecimal;
 
-public class TypeAliasRegistryTest {
+import org.junit.jupiter.api.Test;
+
+class TypeAliasRegistryTest {
 
   @Test
-  public void shouldRegisterAndResolveTypeAlias() {
+  void shouldRegisterAndResolveTypeAlias() {
     TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
 
     typeAliasRegistry.registerAlias("rich", "org.apache.ibatis.domain.misc.RichType");
@@ -35,38 +35,44 @@ public class TypeAliasRegistryTest {
   }
 
   @Test
-  public void shouldFetchArrayType() {
+  void shouldFetchArrayType() {
     TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
     assertEquals(Byte[].class, typeAliasRegistry.resolveAlias("byte[]"));
   }
 
   @Test
-  public void shouldBeAbleToRegisterSameAliasWithSameTypeAgain() {
+  void shouldBeAbleToRegisterSameAliasWithSameTypeAgain() {
     TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
     typeAliasRegistry.registerAlias("String", String.class);
     typeAliasRegistry.registerAlias("string", String.class);
   }
 
   @Test
-  public void shouldNotBeAbleToRegisterSameAliasWithDifferentType() {
+  void shouldNotBeAbleToRegisterSameAliasWithDifferentType() {
     TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
-    assertThrows(TypeException.class, () -> {
-      typeAliasRegistry.registerAlias("string", BigDecimal.class);
-    });
+    assertThrows(TypeException.class, () -> typeAliasRegistry.registerAlias("string", BigDecimal.class));
   }
 
   @Test
-  public void shouldBeAbleToRegisterAliasWithNullType() {
+  void shouldBeAbleToRegisterAliasWithNullType() {
     TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
     typeAliasRegistry.registerAlias("foo", (Class<?>) null);
     assertNull(typeAliasRegistry.resolveAlias("foo"));
   }
 
   @Test
-  public void shouldBeAbleToRegisterNewTypeIfRegisteredTypeIsNull() {
+  void shouldBeAbleToRegisterNewTypeIfRegisteredTypeIsNull() {
     TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
     typeAliasRegistry.registerAlias("foo", (Class<?>) null);
     typeAliasRegistry.registerAlias("foo", String.class);
+  }
+
+  @Test
+  void shouldFetchCharType() {
+    TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
+    assertEquals(Character.class, typeAliasRegistry.resolveAlias("char"));
+    assertEquals(Character[].class, typeAliasRegistry.resolveAlias("char[]"));
+    assertEquals(char[].class, typeAliasRegistry.resolveAlias("_char[]"));
   }
 
 }

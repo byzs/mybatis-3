@@ -1,5 +1,5 @@
-/**
- *    Copyright 2009-2018 the original author or authors.
+/*
+ *    Copyright 2009-2021 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,20 +18,10 @@ package org.apache.ibatis.reflection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-/**
- * 默认的ReflectorFactory 实现类
- */
+import org.apache.ibatis.util.MapUtil;
+
 public class DefaultReflectorFactory implements ReflectorFactory {
-  
-  /**
-   * 是否缓存,默认缓存
-   */
   private boolean classCacheEnabled = true;
-  /**
-   * Reflectory 缓存映射
-   * key class
-   * value Reflector对象
-   */
   private final ConcurrentMap<Class<?>, Reflector> reflectorMap = new ConcurrentHashMap<>();
 
   public DefaultReflectorFactory() {
@@ -49,13 +39,10 @@ public class DefaultReflectorFactory implements ReflectorFactory {
 
   @Override
   public Reflector findForClass(Class<?> type) {
-    // 开启缓存，则从 reflectorMap 中获取
     if (classCacheEnabled) {
-            // synchronized (type) removed see issue #461
-      // 不存在，则进行创建
-      return reflectorMap.computeIfAbsent(type, Reflector::new);
+      // synchronized (type) removed see issue #461
+      return MapUtil.computeIfAbsent(reflectorMap, type, Reflector::new);
     } else {
-      // 关闭缓存，则创建 Reflector 对象
       return new Reflector(type);
     }
   }

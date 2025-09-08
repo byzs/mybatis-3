@@ -1,5 +1,5 @@
-/**
- *    Copyright 2009-2019 the original author or authors.
+/*
+ *    Copyright 2009-2021 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,6 +15,12 @@
  */
 package org.apache.ibatis.binding;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.HashMap;
+
+import javax.sql.DataSource;
+
 import org.apache.ibatis.BaseDataTest;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
@@ -29,17 +35,12 @@ import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import javax.sql.DataSource;
-import java.util.HashMap;
-
-public class MapperMethodParamTest {
+class MapperMethodParamTest {
 
   private static SqlSessionFactory sqlSessionFactory;
 
   @BeforeAll
-  public static void setup() throws Exception {
+  static void setup() throws Exception {
     DataSource dataSource = BaseDataTest.createUnpooledDataSource(BaseDataTest.BLOG_PROPERTIES);
     BaseDataTest.runScript(dataSource, "org/apache/ibatis/binding/paramtest-schema.sql");
     TransactionFactory transactionFactory = new JdbcTransactionFactory();
@@ -50,7 +51,7 @@ public class MapperMethodParamTest {
   }
 
   @Test
-  public void parameterNameIsSizeAndTypeIsLong() {
+  void parameterNameIsSizeAndTypeIsLong() {
     try (SqlSession session = sqlSessionFactory.openSession()) {
       Mapper mapper = session.getMapper(Mapper.class);
       mapper.insert("foo", Long.MAX_VALUE);
@@ -59,7 +60,7 @@ public class MapperMethodParamTest {
   }
 
   @Test
-  public void parameterNameIsSizeUsingHashMap() {
+  void parameterNameIsSizeUsingHashMap() {
     try (SqlSession session = sqlSessionFactory.openSession()) {
       HashMap<String, Object> params = new HashMap<>();
       params.put("id", "foo");

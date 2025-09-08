@@ -1,5 +1,5 @@
-/**
- *    Copyright 2009-2019 the original author or authors.
+/*
+ *    Copyright 2009-2022 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
 import java.util.Deque;
 import java.util.LinkedList;
-import java.util.concurrent.locks.ReadWriteLock;
 
 import org.apache.ibatis.cache.Cache;
 
@@ -28,24 +27,11 @@ import org.apache.ibatis.cache.Cache;
  * Thanks to Dr. Heinz Kabutz for his guidance here.
  *
  * @author Clinton Begin
- * 软引用缓存装饰器 与 弱引用大致相同
  */
 public class SoftCache implements Cache {
-  /**
-   * 强引用,还没有被GC回收的集合
-   */
   private final Deque<Object> hardLinksToAvoidGarbageCollection;
-  /**
-   * 已经被GC回收的集合
-   */
   private final ReferenceQueue<Object> queueOfGarbageCollectedEntries;
-  /**
-   * 修饰Cache
-   */
   private final Cache delegate;
-  /**
-   * 已被回收集合的大小
-   */
   private int numberOfHardLinks;
 
   public SoftCache(Cache delegate) {
@@ -65,7 +51,6 @@ public class SoftCache implements Cache {
     removeGarbageCollectedItems();
     return delegate.getSize();
   }
-
 
   public void setSize(int size) {
     this.numberOfHardLinks = size;
@@ -102,7 +87,9 @@ public class SoftCache implements Cache {
   @Override
   public Object removeObject(Object key) {
     removeGarbageCollectedItems();
-    return delegate.removeObject(key);
+    @SuppressWarnings("unchecked")
+    SoftReference<Object> softReference = (SoftReference<Object>) delegate.removeObject(key);
+    return softReference == null ? null : softReference.get();
   }
 
   @Override
@@ -114,14 +101,6 @@ public class SoftCache implements Cache {
     delegate.clear();
   }
 
-  @Override
-  public ReadWriteLock getReadWriteLock() {
-    return null;
-  }
-
-  /**
-   * 删除已经被GC的缓存
-   */
   private void removeGarbageCollectedItems() {
     SoftEntry sv;
     while ((sv = (SoftEntry) queueOfGarbageCollectedEntries.poll()) != null) {

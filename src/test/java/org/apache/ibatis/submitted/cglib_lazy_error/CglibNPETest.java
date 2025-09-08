@@ -1,5 +1,5 @@
-/**
- *    Copyright 2009-2019 the original author or authors.
+/*
+ *    Copyright 2009-2021 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.apache.ibatis.submitted.cglib_lazy_error;
 
 import java.io.Reader;
+
 import org.apache.ibatis.BaseDataTest;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
@@ -25,12 +26,12 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class CglibNPETest {
+class CglibNPETest {
 
   private static SqlSessionFactory sqlSessionFactory;
 
   @BeforeAll
-  public static void initDatabase() throws Exception {
+  static void initDatabase() throws Exception {
     try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/cglib_lazy_error/ibatisConfig.xml")) {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
     }
@@ -40,7 +41,7 @@ public class CglibNPETest {
   }
 
   @Test
-  public void testNoParent() {
+  void testNoParent() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       PersonMapper personMapper = sqlSession.getMapper(PersonMapper.class);
       Person person = personMapper.selectById(1);
@@ -51,7 +52,7 @@ public class CglibNPETest {
   }
 
   @Test
-  public void testAncestorSelf() {
+  void testAncestorSelf() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       PersonMapper personMapper = sqlSession.getMapper(PersonMapper.class);
       Person person = personMapper.selectById(1);
@@ -62,7 +63,7 @@ public class CglibNPETest {
   }
 
   @Test
-  public void testGrandParent() {
+  void testGrandParent() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       PersonMapper personMapper = sqlSession.getMapper(PersonMapper.class);
       Person expectedParent = personMapper.selectById(2);
@@ -75,7 +76,7 @@ public class CglibNPETest {
   }
 
   @Test
-  public void testAncestor() {
+  void testAncestor() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       PersonMapper personMapper = sqlSession.getMapper(PersonMapper.class);
       Person expectedAncestor = personMapper.selectById(1);
@@ -86,7 +87,7 @@ public class CglibNPETest {
   }
 
   @Test
-  public void testAncestorAfterQueryingParents() {
+  void testAncestorAfterQueryingParents() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       PersonMapper personMapper = sqlSession.getMapper(PersonMapper.class);
       Person expectedAncestor = personMapper.selectById(1);
@@ -100,7 +101,7 @@ public class CglibNPETest {
   }
 
   @Test
-  public void testInsertBetweenTwoSelects() {
+  void testInsertBetweenTwoSelects() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()){
       PersonMapper personMapper = sqlSession.getMapper(PersonMapper.class);
       Person selected1 = personMapper.selectById(1);
@@ -121,7 +122,7 @@ public class CglibNPETest {
   }
 
   @Test
-  public void testSelectWithStringSQLInjection() {
+  void testSelectWithStringSQLInjection() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       PersonMapper personMapper = sqlSession.getMapper(PersonMapper.class);
       Person selected1 = personMapper.selectByStringId("1");

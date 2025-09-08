@@ -1,5 +1,5 @@
-/**
- *    Copyright 2009-2019 the original author or authors.
+/*
+ *    Copyright 2009-2021 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 import javax.sql.DataSource;
@@ -48,6 +49,7 @@ public class UnpooledDataSource implements DataSource {
 
   private Boolean autoCommit;
   private Integer defaultTransactionIsolationLevel;
+  private Integer defaultNetworkTimeout;
 
   static {
     Enumeration<Driver> drivers = DriverManager.getDrivers();
@@ -88,17 +90,11 @@ public class UnpooledDataSource implements DataSource {
     this.driverProperties = driverProperties;
   }
 
-  /**
-   * 获得 Connection 连接
-   */
   @Override
   public Connection getConnection() throws SQLException {
     return doGetConnection(username, password);
   }
 
-  /**
-   * 获得 Connection 连接
-   */
   @Override
   public Connection getConnection(String username, String password) throws SQLException {
     return doGetConnection(username, password);
@@ -140,7 +136,7 @@ public class UnpooledDataSource implements DataSource {
     this.driverProperties = driverProperties;
   }
 
-  public String getDriver() {
+  public synchronized String getDriver() {
     return driver;
   }
 
@@ -188,9 +184,28 @@ public class UnpooledDataSource implements DataSource {
     this.defaultTransactionIsolationLevel = defaultTransactionIsolationLevel;
   }
 
+  /**
+   * Gets the default network timeout.
+   *
+   * @return the default network timeout
+   * @since 3.5.2
+   */
+  public Integer getDefaultNetworkTimeout() {
+    return defaultNetworkTimeout;
+  }
+
+  /**
+   * Sets the default network timeout value to wait for the database operation to complete. See {@link Connection#setNetworkTimeout(java.util.concurrent.Executor, int)}
+   *
+   * @param defaultNetworkTimeout
+   *          The time in milliseconds to wait for the database operation to complete.
+   * @since 3.5.2
+   */
+  public void setDefaultNetworkTimeout(Integer defaultNetworkTimeout) {
+    this.defaultNetworkTimeout = defaultNetworkTimeout;
+  }
 
   private Connection doGetConnection(String username, String password) throws SQLException {
-    // 创建 Properties对象,并且赋值
     Properties props = new Properties();
     if (driverProperties != null) {
       props.putAll(driverProperties);
@@ -201,32 +216,20 @@ public class UnpooledDataSource implements DataSource {
     if (password != null) {
       props.setProperty("password", password);
     }
-    // 执行获取connection连接
     return doGetConnection(props);
   }
 
-  /**
-   * 创建 Connection 连接
-   */
   private Connection doGetConnection(Properties properties) throws SQLException {
-    // driver init
     initializeDriver();
-    // 获得 Connection 对象
     Connection connection = DriverManager.getConnection(url, properties);
-    // 配置 Connection 对象
     configureConnection(connection);
     return connection;
   }
 
-  /**
-   * 驱动初始化
-   */
   private synchronized void initializeDriver() throws SQLException {
-    // 判断 registeredDrivers 是否已经存在该 driver ，若不存在，进行初始化
     if (!registeredDrivers.containsKey(driver)) {
       Class<?> driverType;
       try {
-        // 获取driver类
         if (driverClassLoader != null) {
           driverType = Class.forName(driver, true, driverClassLoader);
         } else {
@@ -234,11 +237,8 @@ public class UnpooledDataSource implements DataSource {
         }
         // DriverManager requires the driver to be loaded via the system ClassLoader.
         // http://www.kfu.com/~nsayer/Java/dyn-jdbc.html
-        // 创建 Driver 对象
-        Driver driverInstance = (Driver)driverType.newInstance();
-        // 创建 DriverProxy 对象，并注册到 DriverManager 中
+        Driver driverInstance = (Driver) driverType.getDeclaredConstructor().newInstance();
         DriverManager.registerDriver(new DriverProxy(driverInstance));
-        // 添加到 registeredDrivers 中
         registeredDrivers.put(driver, driverInstance);
       } catch (Exception e) {
         throw new SQLException("Error setting driver on UnpooledDataSource. Cause: " + e);
@@ -247,11 +247,12 @@ public class UnpooledDataSource implements DataSource {
   }
 
   private void configureConnection(Connection conn) throws SQLException {
-    // 设置自动提交
+    if (defaultNetworkTimeout != null) {
+      conn.setNetworkTimeout(Executors.newSingleThreadExecutor(), defaultNetworkTimeout);
+    }
     if (autoCommit != null && autoCommit != conn.getAutoCommit()) {
       conn.setAutoCommit(autoCommit);
     }
-    // 设置事务隔离级别
     if (defaultTransactionIsolationLevel != null) {
       conn.setTransactionIsolation(defaultTransactionIsolationLevel);
     }
@@ -294,7 +295,7 @@ public class UnpooledDataSource implements DataSource {
       return this.driver.jdbcCompliant();
     }
 
-//     @Override only valid jdk7+
+    @Override
     public Logger getParentLogger() {
       return Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     }
@@ -310,7 +311,7 @@ public class UnpooledDataSource implements DataSource {
     return false;
   }
 
-  // @Override only valid jdk7+
+  @Override
   public Logger getParentLogger() {
     // requires JDK version 1.6
     return Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);

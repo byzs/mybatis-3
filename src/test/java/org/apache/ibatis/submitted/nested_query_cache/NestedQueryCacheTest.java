@@ -1,5 +1,5 @@
-/**
- *    Copyright 2009-2018 the original author or authors.
+/*
+ *    Copyright 2009-2021 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,6 +15,11 @@
  */
 package org.apache.ibatis.submitted.nested_query_cache;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.io.Reader;
+
 import org.apache.ibatis.BaseDataTest;
 import org.apache.ibatis.domain.blog.Author;
 import org.apache.ibatis.io.Resources;
@@ -24,19 +29,15 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.Reader;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-
-public class NestedQueryCacheTest extends BaseDataTest {
+class NestedQueryCacheTest extends BaseDataTest {
 
   private static SqlSessionFactory sqlSessionFactory;
 
   @BeforeAll
-  public static void setUp() throws Exception {
+  static void setUp() throws Exception {
     // create a SqlSessionFactory
-    try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/nested_query_cache/MapperConfig.xml")) {
+    try (Reader reader = Resources
+        .getResourceAsReader("org/apache/ibatis/submitted/nested_query_cache/MapperConfig.xml")) {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
     }
 
@@ -44,7 +45,7 @@ public class NestedQueryCacheTest extends BaseDataTest {
   }
 
   @Test
-  public void testThatNestedQueryItemsAreRetrievedFromCache() throws Exception {
+  void testThatNestedQueryItemsAreRetrievedFromCache() {
     final Author author;
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       final AuthorMapper authorMapper = sqlSession.getMapper(AuthorMapper.class);
@@ -66,7 +67,7 @@ public class NestedQueryCacheTest extends BaseDataTest {
   }
 
   @Test
-  public void testThatNestedQueryItemsAreRetrievedIfNotInCache() throws Exception {
+  void testThatNestedQueryItemsAreRetrievedIfNotInCache() {
     Author author;
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       final BlogMapper blogMapper = sqlSession.getMapper(BlogMapper.class);

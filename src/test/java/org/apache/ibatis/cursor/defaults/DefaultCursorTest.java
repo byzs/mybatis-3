@@ -1,5 +1,5 @@
-/**
- *    Copyright 2009-2019 the original author or authors.
+/*
+ *    Copyright 2009-2021 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-
 package org.apache.ibatis.cursor.defaults;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -53,7 +52,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class DefaultCursorTest {
+class DefaultCursorTest {
   @Spy
   private ImpatientResultSet rs;
   @Mock
@@ -61,7 +60,7 @@ public class DefaultCursorTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void shouldCloseImmediatelyIfResultSetIsClosed() throws Exception {
+  void shouldCloseImmediatelyIfResultSetIsClosed() throws Exception {
     final MappedStatement ms = getNestedAndOrderedMappedStatement();
     final ResultMap rm = ms.getResultMaps().get(0);
 
@@ -89,7 +88,7 @@ public class DefaultCursorTest {
       Iterator<?> iter = cursor.iterator();
       assertTrue(iter.hasNext());
       Map<String, Object> map = (Map<String, Object>) iter.next();
-      assertEquals(Integer.valueOf(1), map.get("id"));
+      assertEquals(1, map.get("id"));
       assertEquals("CEO", ((Map<String, Object>) map.get("roles")).get("role"));
 
       assertFalse(cursor.isConsumed());
@@ -141,7 +140,7 @@ public class DefaultCursorTest {
 
     protected ImpatientResultSet() {
       Map<String, Object> row = new HashMap<>();
-      row.put("id", Integer.valueOf(1));
+      row.put("id", 1);
       row.put("role", "CEO");
       rows.add(row);
     }
@@ -153,7 +152,7 @@ public class DefaultCursorTest {
     }
 
     @Override
-    public boolean isClosed() throws SQLException {
+    public boolean isClosed() {
       return rowIndex >= rows.size();
     }
 
@@ -176,7 +175,7 @@ public class DefaultCursorTest {
     }
 
     @Override
-    public ResultSetMetaData getMetaData() throws SQLException {
+    public ResultSetMetaData getMetaData() {
       return rsmd;
     }
 

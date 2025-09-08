@@ -1,5 +1,5 @@
-/**
- *    Copyright 2009-2018 the original author or authors.
+/*
+ *    Copyright 2009-2021 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -14,6 +14,12 @@
  *    limitations under the License.
  */
 package org.apache.ibatis.scripting.defaults;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -32,21 +38,15 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 /**
  * DefaultParameterHandlerTest
  *
  * @author Ryan Lamore
  */
-public class DefaultParameterHandlerTest {
+class DefaultParameterHandlerTest {
 
   @Test
-  public void setParametersThrowsProperException() throws SQLException {
+  void setParametersThrowsProperException() throws SQLException {
     final MappedStatement mappedStatement = getMappedStatement();
     final Object parameterObject = null;
     final BoundSql boundSql = mock(BoundSql.class);

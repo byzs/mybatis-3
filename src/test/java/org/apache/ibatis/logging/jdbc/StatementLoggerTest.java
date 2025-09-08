@@ -1,5 +1,5 @@
-/**
- *    Copyright 2009-2019 the original author or authors.
+/*
+ *    Copyright 2009-2021 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class StatementLoggerTest {
+class StatementLoggerTest {
 
   @Mock
   Statement statement;
@@ -41,15 +41,15 @@ public class StatementLoggerTest {
   @Mock
   Log log;
 
-  Statement st;
+  private Statement st;
 
   @BeforeEach
-  public void setUp() throws SQLException {
+  void setUp() throws SQLException {
     st = StatementLogger.newInstance(statement, log, 1);
   }
 
   @Test
-  public void shouldPrintLog() throws SQLException {
+  void shouldPrintLog() throws SQLException {
     when(log.isDebugEnabled()).thenReturn(true);
     st.executeQuery("select 1");
 
@@ -57,7 +57,7 @@ public class StatementLoggerTest {
   }
 
   @Test
-  public void shouldPrintLogForUpdate() throws SQLException {
+  void shouldPrintLogForUpdate() throws SQLException {
     when(log.isDebugEnabled()).thenReturn(true);
     when(statement.execute(anyString())).thenReturn(true);
     String sql = "update name = '' from test";
@@ -68,7 +68,7 @@ public class StatementLoggerTest {
   }
 
   @Test
-  public void shouldNotPrintLog() throws SQLException {
+  void shouldNotPrintLog() throws SQLException {
     st.getResultSet();
     st.close();
     verify(log, times(0)).debug(anyString());

@@ -1,5 +1,5 @@
-/**
- *    Copyright 2009-2018 the original author or authors.
+/*
+ *    Copyright 2009-2021 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -39,25 +39,40 @@ public class ExpressionEvaluator {
     return value != null;
   }
 
+  /**
+   * @deprecated Since 3.5.9, use the {@link #evaluateIterable(String, Object, boolean)}.
+   */
+   @Deprecated
   public Iterable<?> evaluateIterable(String expression, Object parameterObject) {
+    return evaluateIterable(expression, parameterObject, false);
+  }
+
+  /**
+   * @since 3.5.9
+   */
+  public Iterable<?> evaluateIterable(String expression, Object parameterObject, boolean nullable) {
     Object value = OgnlCache.getValue(expression, parameterObject);
     if (value == null) {
-      throw new BuilderException("The expression '" + expression + "' evaluated to a null value.");
+      if (nullable) {
+        return null;
+      } else {
+        throw new BuilderException("The expression '" + expression + "' evaluated to a null value.");
+      }
     }
     if (value instanceof Iterable) {
       return (Iterable<?>) value;
     }
     if (value.getClass().isArray()) {
-        // the array may be primitive, so Arrays.asList() may throw
-        // a ClassCastException (issue 209).  Do the work manually
-        // Curse primitives! :) (JGB)
-        int size = Array.getLength(value);
-        List<Object> answer = new ArrayList<>();
-        for (int i = 0; i < size; i++) {
-            Object o = Array.get(value, i);
-            answer.add(o);
-        }
-        return answer;
+      // the array may be primitive, so Arrays.asList() may throw
+      // a ClassCastException (issue 209).  Do the work manually
+      // Curse primitives! :) (JGB)
+      int size = Array.getLength(value);
+      List<Object> answer = new ArrayList<>();
+      for (int i = 0; i < size; i++) {
+        Object o = Array.get(value, i);
+        answer.add(o);
+      }
+      return answer;
     }
     if (value instanceof Map) {
       return ((Map) value).entrySet();

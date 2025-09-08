@@ -1,5 +1,5 @@
-/**
- *    Copyright 2009-2018 the original author or authors.
+/*
+ *    Copyright 2009-2021 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -35,38 +35,27 @@ import org.junit.jupiter.api.Test;
 /**
  * @author Kazuki Shimizu
  */
-public class Jsr310TypeHandlerRegistryTest {
+class Jsr310TypeHandlerRegistryTest {
 
   private TypeHandlerRegistry typeHandlerRegistry;
 
   @BeforeEach
-  public void setup() {
+  void setup() {
     typeHandlerRegistry = new TypeHandlerRegistry();
   }
 
   @Test
-  public void shouldRegisterJsr310TypeHandlers() throws ClassNotFoundException {
-    assertThat(typeHandlerRegistry.getTypeHandler(Instant.class))
-        .isInstanceOf(InstantTypeHandler.class);
-    assertThat(typeHandlerRegistry.getTypeHandler(LocalDateTime.class))
-        .isInstanceOf(LocalDateTimeTypeHandler.class);
-    assertThat(typeHandlerRegistry.getTypeHandler(LocalDate.class))
-        .isInstanceOf(LocalDateTypeHandler.class);
-    assertThat(typeHandlerRegistry.getTypeHandler(LocalTime.class))
-        .isInstanceOf(LocalTimeTypeHandler.class);
-    assertThat(typeHandlerRegistry.getTypeHandler(OffsetDateTime.class))
-        .isInstanceOf(OffsetDateTimeTypeHandler.class);
-    assertThat(typeHandlerRegistry.getTypeHandler(OffsetTime.class))
-        .isInstanceOf(OffsetTimeTypeHandler.class);
-    assertThat(typeHandlerRegistry.getTypeHandler(ZonedDateTime.class))
-        .isInstanceOf(ZonedDateTimeTypeHandler.class);
-    assertThat(typeHandlerRegistry.getTypeHandler(Month.class))
-        .isInstanceOf(MonthTypeHandler.class);
-    assertThat(typeHandlerRegistry.getTypeHandler(Year.class))
-        .isInstanceOf(YearTypeHandler.class);
-    assertThat(typeHandlerRegistry.getTypeHandler(YearMonth.class))
-        .isInstanceOf(YearMonthTypeHandler.class);
-    assertThat(typeHandlerRegistry.getTypeHandler(JapaneseDate.class))
-        .isInstanceOf(JapaneseDateTypeHandler.class);
+  void shouldRegisterJsr310TypeHandlers() {
+    assertThat(typeHandlerRegistry.getTypeHandler(Instant.class)).isInstanceOf(InstantTypeHandler.class);
+    assertThat(typeHandlerRegistry.getTypeHandler(LocalDateTime.class)).isInstanceOf(LocalDateTimeTypeHandler.class);
+    assertThat(typeHandlerRegistry.getTypeHandler(LocalDate.class)).isInstanceOf(LocalDateTypeHandler.class);
+    assertThat(typeHandlerRegistry.getTypeHandler(LocalTime.class)).isInstanceOf(LocalTimeTypeHandler.class);
+    assertThat(typeHandlerRegistry.getTypeHandler(OffsetDateTime.class)).isInstanceOf(OffsetDateTimeTypeHandler.class);
+    assertThat(typeHandlerRegistry.getTypeHandler(OffsetTime.class)).isInstanceOf(OffsetTimeTypeHandler.class);
+    assertThat(typeHandlerRegistry.getTypeHandler(ZonedDateTime.class)).isInstanceOf(ZonedDateTimeTypeHandler.class);
+    assertThat(typeHandlerRegistry.getTypeHandler(Month.class)).isInstanceOf(MonthTypeHandler.class);
+    assertThat(typeHandlerRegistry.getTypeHandler(Year.class)).isInstanceOf(YearTypeHandler.class);
+    assertThat(typeHandlerRegistry.getTypeHandler(YearMonth.class)).isInstanceOf(YearMonthTypeHandler.class);
+    assertThat(typeHandlerRegistry.getTypeHandler(JapaneseDate.class)).isInstanceOf(JapaneseDateTypeHandler.class);
   }
 }

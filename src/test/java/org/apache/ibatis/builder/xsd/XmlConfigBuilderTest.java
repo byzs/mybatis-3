@@ -1,5 +1,5 @@
-/**
- *    Copyright 2009-2019 the original author or authors.
+/*
+ *    Copyright 2009-2021 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -14,6 +14,12 @@
  *    limitations under the License.
  */
 package org.apache.ibatis.builder.xsd;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.HashSet;
 
 import org.apache.ibatis.builder.CustomLongTypeHandler;
 import org.apache.ibatis.builder.CustomObjectWrapperFactory;
@@ -44,18 +50,11 @@ import org.apache.ibatis.type.JdbcType;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 @Disabled("We'll try a different approach. See #1393")
-public class XmlConfigBuilderTest {
+class XmlConfigBuilderTest {
 
   @Test
-  public void shouldSuccessfullyLoadMinimalXMLConfigFile() throws Exception {
+  void shouldSuccessfullyLoadMinimalXMLConfigFile() throws Exception {
     // System.setProperty(XPathParser.KEY_USE_XSD, "true");
     String resource = "org/apache/ibatis/builder/xsd/MinimalMapperConfig.xml";
     try (InputStream inputStream = Resources.getResourceAsStream(resource)) {
@@ -85,13 +84,15 @@ public class XmlConfigBuilderTest {
       assertNull(config.getLogPrefix());
       assertNull(config.getLogImpl());
       assertNull(config.getConfigurationFactory());
+      assertFalse(config.isShrinkWhitespacesInSql());
+      assertFalse(config.isArgNameBasedConstructorAutoMapping());
     } finally {
       // System.clearProperty(XPathParser.KEY_USE_XSD);
     }
   }
 
   @Test
-  public void shouldSuccessfullyLoadXMLConfigFitle() throws Exception {
+  void shouldSuccessfullyLoadXMLConfigFile() throws Exception {
     // System.setProperty(XPathParser.KEY_USE_XSD, "true");
     String resource = "org/apache/ibatis/builder/xsd/CustomizedSettingsMapperConfig.xml";
     try (InputStream inputStream = Resources.getResourceAsStream(resource)) {
@@ -122,10 +123,12 @@ public class XmlConfigBuilderTest {
       assertEquals(Slf4jImpl.class.getName(), config.getLogImpl().getName());
       assertEquals(JBoss6VFS.class.getName(), config.getVfsImpl().getName());
       assertEquals(String.class.getName(), config.getConfigurationFactory().getName());
+      assertTrue(config.isShrinkWhitespacesInSql());
+      assertTrue(config.isArgNameBasedConstructorAutoMapping());
 
-      assertTrue(config.getTypeAliasRegistry().getTypeAliases().get("blogauthor").equals(Author.class));
-      assertTrue(config.getTypeAliasRegistry().getTypeAliases().get("blog").equals(Blog.class));
-      assertTrue(config.getTypeAliasRegistry().getTypeAliases().get("cart").equals(Cart.class));
+      assertEquals(Author.class, config.getTypeAliasRegistry().getTypeAliases().get("blogauthor"));
+      assertEquals(Blog.class, config.getTypeAliasRegistry().getTypeAliases().get("blog"));
+      assertEquals(Cart.class, config.getTypeAliasRegistry().getTypeAliases().get("cart"));
 
       assertTrue(config.getTypeHandlerRegistry().getTypeHandler(Integer.class) instanceof CustomIntegerTypeHandler);
       assertTrue(config.getTypeHandlerRegistry().getTypeHandler(Long.class) instanceof CustomLongTypeHandler);

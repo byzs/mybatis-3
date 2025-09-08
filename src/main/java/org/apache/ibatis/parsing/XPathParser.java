@@ -1,5 +1,5 @@
-/**
- *    Copyright 2009-2019 the original author or authors.
+/*
+ *    Copyright 2009-2021 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -45,25 +46,10 @@ import org.xml.sax.SAXParseException;
  */
 public class XPathParser {
 
-  /**
-   * XML Document 对象
-   */
   private final Document document;
-  /**
-   * 是否校验
-   */
   private boolean validation;
-  /**
-   * XML 实体解析器
-   */
   private EntityResolver entityResolver;
-  /**
-   * 变量Properties 对象
-   */
   private Properties variables;
-  /**
-   * Java XPath对象 解析 XML
-   */
   private XPath xpath;
 
   public XPathParser(String xml) {
@@ -233,15 +219,6 @@ public class XPathParser {
     return new XNode(this, node, variables);
   }
 
-
-  /**
-   * 获得指定元素或节点的值
-   *
-   * @param expression 表达式
-   * @param root 指定节点
-   * @param returnType 返回类型
-   * @return 值
-   */
   private Object evaluate(String expression, Object root, QName returnType) {
     try {
       return xpath.evaluate(expression, root, returnType);
@@ -250,33 +227,20 @@ public class XPathParser {
     }
   }
 
-  /**
-   * 解析 XML 创建 Document 对象
-   * @param inputSource XML 输入流
-   * @return Document对象
-   */
   private Document createDocument(InputSource inputSource) {
-
+    // important: this must only be called AFTER common constructor
     try {
-      // 1.创建解析器工厂
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-
-      // 验证属性
+      factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
       factory.setValidating(validation);
-      // 解析域名空间
+
       factory.setNamespaceAware(false);
-      // 忽略注释
       factory.setIgnoringComments(true);
-      // 可忽略空格
       factory.setIgnoringElementContentWhitespace(false);
-      // CDATA 节点转换为 Text 节点，并将其附加到相邻（如果有）的 Text 节点
       factory.setCoalescing(false);
-      // 是否将工厂配置为生成扩展实体引用节点的解析器
       factory.setExpandEntityReferences(true);
 
-      // 2.创建解析器
       DocumentBuilder builder = factory.newDocumentBuilder();
-      // 设置实体解析器
       builder.setEntityResolver(entityResolver);
       builder.setErrorHandler(new ErrorHandler() {
         @Override
@@ -291,18 +255,15 @@ public class XPathParser {
 
         @Override
         public void warning(SAXParseException exception) throws SAXException {
+          // NOP
         }
       });
-      // 3.解析XML
       return builder.parse(inputSource);
     } catch (Exception e) {
       throw new BuilderException("Error creating document instance.  Cause: " + e, e);
     }
   }
 
-  /**
-   * 公用构造
-   */
   private void commonConstructor(boolean validation, Properties variables, EntityResolver entityResolver) {
     this.validation = validation;
     this.entityResolver = entityResolver;

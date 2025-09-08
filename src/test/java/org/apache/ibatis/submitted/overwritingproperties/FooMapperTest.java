@@ -1,5 +1,5 @@
-/**
- *    Copyright 2009-2018 the original author or authors.
+/*
+ *    Copyright 2009-2021 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -32,31 +32,32 @@ import org.junit.jupiter.api.Test;
 /*
  * @author jjensen
  */
-public class FooMapperTest {
+class FooMapperTest {
 
   private final static String SQL_MAP_CONFIG = "org/apache/ibatis/submitted/overwritingproperties/sqlmap.xml";
   private static SqlSession session;
   private static Connection conn;
 
   @BeforeAll
-  public static void setUpBeforeClass() throws Exception {
-    final SqlSessionFactory factory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsReader(SQL_MAP_CONFIG));
+  static void setUpBeforeClass() throws Exception {
+    final SqlSessionFactory factory = new SqlSessionFactoryBuilder()
+        .build(Resources.getResourceAsReader(SQL_MAP_CONFIG));
     session = factory.openSession();
     conn = session.getConnection();
 
     BaseDataTest.runScript(factory.getConfiguration().getEnvironment().getDataSource(),
-            "org/apache/ibatis/submitted/overwritingproperties/create-schema-mysql.sql");
+        "org/apache/ibatis/submitted/overwritingproperties/create-schema-mysql.sql");
   }
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     final FooMapper mapper = session.getMapper(FooMapper.class);
     mapper.deleteAllFoo();
     session.commit();
   }
 
   @Test
-  public void testOverwriteWithDefault() {
+  void testOverwriteWithDefault() {
     final FooMapper mapper = session.getMapper(FooMapper.class);
     final Bar bar = new Bar(2L);
     final Foo inserted = new Foo(1L, bar, 3, 4);
@@ -70,7 +71,7 @@ public class FooMapperTest {
 
     // field4 is not mapped in the result map
     // <result property="field4" column="field3" jdbcType="INTEGER"/>
-    Assertions.assertEquals(inserted.getField3(), selected.getField4() );
+    Assertions.assertEquals(inserted.getField3(), selected.getField4());
 
     // field4 is explicitly remapped to field3 in the resultmap
     // <result property="field3" column="field4" jdbcType="INTEGER"/>
@@ -85,7 +86,7 @@ public class FooMapperTest {
   }
 
   @AfterAll
-  public static void tearDownAfterClass() {
+  static void tearDownAfterClass() {
     try {
       conn.close();
     } catch (SQLException e) {

@@ -1,5 +1,5 @@
-/**
- *    Copyright 2009-2019 the original author or authors.
+/*
+ *    Copyright 2009-2021 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -33,13 +33,14 @@ import org.junit.jupiter.api.Test;
  * This test is based on the org.apache.ibatis.submitted.multiple_resultsets test.
  *
  */
-public class MultipleResultSetTest {
+class MultipleResultSetTest {
 
   private static SqlSessionFactory sqlSessionFactory;
 
   @BeforeAll
-  public static void setUp() throws Exception {
-    try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/multipleresultsetswithassociation/mybatis-config.xml")) {
+  static void setUp() throws Exception {
+    try (Reader reader = Resources
+        .getResourceAsReader("org/apache/ibatis/submitted/multipleresultsetswithassociation/mybatis-config.xml")) {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
     }
 
@@ -49,18 +50,20 @@ public class MultipleResultSetTest {
     try (SqlSession session = sqlSessionFactory.openSession();
          Connection conn = session.getConnection()) {
       try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/multipleresultsetswithassociation/CreateDB1.sql")) {
-        runReaderScript(conn, session, reader);
+        runReaderScript(conn, reader);
       }
-      try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/multipleresultsetswithassociation/CreateDB2.sql")) {
-        runReaderScript(conn, session, reader);
+      try (Reader reader = Resources
+          .getResourceAsReader("org/apache/ibatis/submitted/multipleresultsetswithassociation/CreateDB2.sql")) {
+        runReaderScript(conn, reader);
       }
-      try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/multipleresultsetswithassociation/CreateDB3.sql")) {
-        runReaderScript(conn, session, reader);
+      try (Reader reader = Resources
+          .getResourceAsReader("org/apache/ibatis/submitted/multipleresultsetswithassociation/CreateDB3.sql")) {
+        runReaderScript(conn, reader);
       }
     }
   }
 
-  private static void runReaderScript(Connection conn, SqlSession session, Reader reader) throws Exception {
+  private static void runReaderScript(Connection conn, Reader reader) {
     ScriptRunner runner = new ScriptRunner(conn);
     runner.setLogWriter(null);
     runner.setSendFullScript(true);
@@ -70,7 +73,7 @@ public class MultipleResultSetTest {
   }
 
   @Test
-  public void shouldGetOrderDetailsEachHavingAnOrderHeader() {
+  void shouldGetOrderDetailsEachHavingAnOrderHeader() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       Mapper mapper = sqlSession.getMapper(Mapper.class);
       List<OrderDetail> orderDetails = mapper.getOrderDetailsWithHeaders();
@@ -81,14 +84,14 @@ public class MultipleResultSetTest {
 
       // Each order detail should have a corresponding OrderHeader
       // Only 2 of 6 orderDetails have orderHeaders
-      for(OrderDetail orderDetail : orderDetails){
-          Assertions.assertNotNull(orderDetail.getOrderHeader());
+      for (OrderDetail orderDetail : orderDetails) {
+        Assertions.assertNotNull(orderDetail.getOrderHeader());
       }
     }
   }
 
   @Test
-  public void shouldGetOrderDetailsEachHavingAnOrderHeaderAnnotationBased() {
+  void shouldGetOrderDetailsEachHavingAnOrderHeaderAnnotationBased() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       Mapper mapper = sqlSession.getMapper(Mapper.class);
       List<OrderDetail> orderDetails = mapper.getOrderDetailsWithHeadersAnnotationBased();
@@ -99,8 +102,8 @@ public class MultipleResultSetTest {
 
       // Each order detail should have a corresponding OrderHeader
       // Only 2 of 6 orderDetails have orderHeaders
-      for(OrderDetail orderDetail : orderDetails){
-          Assertions.assertNotNull(orderDetail.getOrderHeader());
+      for (OrderDetail orderDetail : orderDetails) {
+        Assertions.assertNotNull(orderDetail.getOrderHeader());
       }
     }
   }

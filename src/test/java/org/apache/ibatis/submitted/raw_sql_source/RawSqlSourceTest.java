@@ -1,5 +1,5 @@
-/**
- *    Copyright 2009-2018 the original author or authors.
+/*
+ *    Copyright 2009-2021 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -29,40 +29,42 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class RawSqlSourceTest {
+class RawSqlSourceTest {
 
   private static SqlSessionFactory sqlSessionFactory;
 
   @BeforeAll
-  public static void setUp() throws Exception {
+  static void setUp() throws Exception {
     // create an SqlSessionFactory
-    try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/raw_sql_source/mybatis-config.xml")) {
+    try (Reader reader = Resources
+        .getResourceAsReader("org/apache/ibatis/submitted/raw_sql_source/mybatis-config.xml")) {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
     }
 
     // populate in-memory database
     BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-            "org/apache/ibatis/submitted/raw_sql_source/CreateDB.sql");
+        "org/apache/ibatis/submitted/raw_sql_source/CreateDB.sql");
   }
 
   @Test
-  public void shouldUseRawSqlSourceForAnStaticStatement() {
+  void shouldUseRawSqlSourceForAnStaticStatement() {
     test("getUser1", RawSqlSource.class);
   }
 
   @Test
-  public void shouldUseDynamicSqlSourceForAnStatementWithInlineArguments() {
+  void shouldUseDynamicSqlSourceForAnStatementWithInlineArguments() {
     test("getUser2", DynamicSqlSource.class);
   }
 
   @Test
-  public void shouldUseDynamicSqlSourceForAnStatementWithXmlTags() {
+  void shouldUseDynamicSqlSourceForAnStatementWithXmlTags() {
     test("getUser3", DynamicSqlSource.class);
   }
 
   private void test(String statement, Class<? extends SqlSource> sqlSource) {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      Assertions.assertEquals(sqlSource, sqlSession.getConfiguration().getMappedStatement(statement).getSqlSource().getClass());
+      Assertions.assertEquals(sqlSource,
+          sqlSession.getConfiguration().getMappedStatement(statement).getSqlSource().getClass());
       String sql = sqlSession.getConfiguration().getMappedStatement(statement).getSqlSource().getBoundSql('?').getSql();
       Assertions.assertEquals("select * from users where id = ?", sql);
       User user = sqlSession.selectOne(statement, 1);

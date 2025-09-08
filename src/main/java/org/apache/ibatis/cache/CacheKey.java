@@ -1,5 +1,5 @@
-/**
- *    Copyright 2009-2019 the original author or authors.
+/*
+ *    Copyright 2009-2021 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.apache.ibatis.cache;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 import org.apache.ibatis.reflection.ArrayUtil;
 
@@ -28,40 +29,33 @@ public class CacheKey implements Cloneable, Serializable {
 
   private static final long serialVersionUID = 1146682552656046210L;
 
-  /**
-   * 空键
-   */
-  public static final CacheKey NULL_CACHE_KEY = new NullCacheKey();
-  /**
-   * 默认 {@link #multiplier} 的值
-   */
-  private static final int DEFAULT_MULTIPLYER = 37;
-  /**
-   * 默认 {@link #hashcode} 的值
-   */
+  public static final CacheKey NULL_CACHE_KEY = new CacheKey() {
+
+    @Override
+    public void update(Object object) {
+      throw new CacheException("Not allowed to update a null cache key instance.");
+    }
+
+    @Override
+    public void updateAll(Object[] objects) {
+      throw new CacheException("Not allowed to update a null cache key instance.");
+    }
+  };
+
+  private static final int DEFAULT_MULTIPLIER = 37;
   private static final int DEFAULT_HASHCODE = 17;
-  /**
-   * hashcode 求值的系数
-   */
+
   private final int multiplier;
-  /**
-   * 缓存键的hashCode
-   */
   private int hashcode;
-  /**
-   * 校验和
-   */
   private long checksum;
-  /**
-   * {@link #update(Object)} 的数量
-   */
   private int count;
-  // 8/21/2017 - Sonarlint flags this as needing to be marked transient.  While true if content is not serializable, this is not always true and thus should not be marked transient.
+  // 8/21/2017 - Sonarlint flags this as needing to be marked transient. While true if content is not serializable, this
+  // is not always true and thus should not be marked transient.
   private List<Object> updateList;
 
   public CacheKey() {
     this.hashcode = DEFAULT_HASHCODE;
-    this.multiplier = DEFAULT_MULTIPLYER;
+    this.multiplier = DEFAULT_MULTIPLIER;
     this.count = 0;
     this.updateList = new ArrayList<>();
   }
@@ -76,16 +70,14 @@ public class CacheKey implements Cloneable, Serializable {
   }
 
   public void update(Object object) {
-    // 获取hashCode
     int baseHashCode = object == null ? 1 : ArrayUtil.hashCode(object);
-    // 统计
+
     count++;
-    // checksum 为 baseHashCode 的求和
     checksum += baseHashCode;
-    // 重新计算hashCode
     baseHashCode *= count;
+
     hashcode = multiplier * hashcode + baseHashCode;
-    // 放入集合中
+
     updateList.add(object);
   }
 
@@ -133,10 +125,10 @@ public class CacheKey implements Cloneable, Serializable {
 
   @Override
   public String toString() {
-    StringBuilder returnValue = new StringBuilder().append(hashcode).append(':').append(checksum);
-    for (Object object : updateList) {
-      returnValue.append(':').append(ArrayUtil.toString(object));
-    }
+    StringJoiner returnValue = new StringJoiner(":");
+    returnValue.add(String.valueOf(hashcode));
+    returnValue.add(String.valueOf(checksum));
+    updateList.stream().map(ArrayUtil::toString).forEach(returnValue::add);
     return returnValue.toString();
   }
 

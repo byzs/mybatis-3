@@ -1,5 +1,5 @@
-/**
- *    Copyright 2009-2018 the original author or authors.
+/*
+ *    Copyright 2009-2022 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.apache.ibatis.submitted.autodiscover;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.Reader;
@@ -29,31 +30,31 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class AutodiscoverTest {
+class AutodiscoverTest {
 
   protected static SqlSessionFactory sqlSessionFactory;
 
   @BeforeAll
-  public static void setup() throws Exception {
+  static void setup() throws Exception {
     try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/autodiscover/MapperConfig.xml")) {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
     }
   }
 
   @Test
-  public void testTypeAlias() {
+  void testTypeAlias() {
     TypeAliasRegistry typeAliasRegistry = sqlSessionFactory.getConfiguration().getTypeAliasRegistry();
-    typeAliasRegistry.resolveAlias("testAlias");
+    assertNotNull(typeAliasRegistry.resolveAlias("testAlias"));
   }
 
   @Test
-  public void testTypeHandler() {
+  void testTypeHandler() {
     TypeHandlerRegistry typeHandlerRegistry = sqlSessionFactory.getConfiguration().getTypeHandlerRegistry();
     assertTrue(typeHandlerRegistry.hasTypeHandler(BigInteger.class));
   }
 
   @Test
-  public void testMapper() {
+  void testMapper() {
     assertTrue(sqlSessionFactory.getConfiguration().hasMapper(DummyMapper.class));
   }
 }
