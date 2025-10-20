@@ -268,6 +268,9 @@ public class XNode {
     return children;
   }
 
+  /**
+   * proterties 子属性节点解析
+   */
   public Properties getChildrenAsProperties() {
     Properties properties = new Properties();
     for (XNode child : getChildren()) {

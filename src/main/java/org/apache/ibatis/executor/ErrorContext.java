@@ -17,18 +17,51 @@ package org.apache.ibatis.executor;
 
 /**
  * @author Clinton Begin
+ * 这个类是整个 MyBatis 框架错误处理的基石，它使得：
+ * 配置解析错误能准确定位到文件和具体位置
+ * SQL 执行错误能关联到具体的 Mapper 和方法
+ * 类型转换错误能追溯到具体的参数和结果映射
  */
 public class ErrorContext {
 
+  /**
+   * 系统分隔符
+   */
   private static final String LINE_SEPARATOR = System.lineSeparator();
+  /**
+   * 每个线程拥有独立的 ErrorContext 实例
+   * 避免多线程环境下的错误信息混淆
+   * 使用懒加载模式创建实例
+   */
   private static final ThreadLocal<ErrorContext> LOCAL = ThreadLocal.withInitial(ErrorContext::new);
 
+  /**
+   * 存储的上一个上下文（用于嵌套操作）
+   */
   private ErrorContext stored;
+  /**
+   * 资源信息
+   */
   private String resource;
+  /**
+   * 当前活动描述
+   */
   private String activity;
+  /**
+   * 相关对象
+   */
   private String object;
+  /**
+   * 错误消息
+   */
   private String message;
+  /**
+   * 相关的 SQL 语句
+   */
   private String sql;
+  /**
+   * 异常信息
+   */
   private Throwable cause;
 
   private ErrorContext() {
@@ -83,6 +116,9 @@ public class ErrorContext {
     return this;
   }
 
+  /**
+   * 清空上下文
+   */
   public ErrorContext reset() {
     resource = null;
     activity = null;

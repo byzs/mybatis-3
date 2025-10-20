@@ -27,6 +27,9 @@ public class LanguageDriverRegistry {
 
   private final Map<Class<? extends LanguageDriver>, LanguageDriver> LANGUAGE_DRIVER_MAP = new HashMap<>();
 
+  /**
+   * 指定动态 SQL 生成使用的默认脚本语言。
+   */
   private Class<? extends LanguageDriver> defaultDriverClass;
 
   public void register(Class<? extends LanguageDriver> cls) {

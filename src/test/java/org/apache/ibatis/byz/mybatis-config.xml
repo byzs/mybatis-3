@@ -22,22 +22,6 @@
 
 <configuration>
 
-
-    <properties>
-        <property name="username" value="dev_user"/>
-        <property name="password" value="F2Fa3!33TYyg"/>
-    </properties>
-
-    <settings>
-        <setting name="cacheEnabled" value="true"/>
-        <setting name="lazyLoadingEnabled" value="false"/>
-        <setting name="multipleResultSetsEnabled" value="true"/>
-        <setting name="useColumnLabel" value="true"/>
-        <setting name="useGeneratedKeys" value="false"/>
-        <setting name="defaultExecutorType" value="SIMPLE"/>
-        <setting name="defaultStatementTimeout" value="25"/>
-    </settings>
-
     <!-- autoMappingBehavior should be set in each test case -->
 
     <environments default="development">
@@ -53,9 +37,7 @@
         </environment>
     </environments>
 
-    
     <mappers>
-        <package name="cccc/ccc/*"/>
         <mapper resource="org/apache/ibatis/autoconstructor/AutoConstructorMapper.xml"/>
     </mappers>
 

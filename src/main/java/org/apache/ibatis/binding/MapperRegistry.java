@@ -36,6 +36,7 @@ public class MapperRegistry {
   private final Configuration config;
   private final Map<Class<?>, MapperProxyFactory<?>> knownMappers = new HashMap<>();
 
+
   public MapperRegistry(Configuration config) {
     this.config = config;
   }
@@ -112,6 +113,8 @@ public class MapperRegistry {
    *
    * @param packageName
    *          the package name
+   *
+   *          
    * @since 3.2.2
    */
   public void addMappers(String packageName) {

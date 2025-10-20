@@ -121,6 +121,7 @@ public class TypeAliasRegistry {
       if (typeAliases.containsKey(key)) {
         value = (Class<T>) typeAliases.get(key);
       } else {
+        // 自定义类型获取
         value = (Class<T>) Resources.classForName(string);
       }
       return value;

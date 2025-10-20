@@ -65,19 +65,30 @@ public class Reflector {
 
   private Map<String, String> caseInsensitivePropertyMap = new HashMap<>();
 
+  /**
+   * 分析目标类结构,获取所有的 可读,可写 以及不区分大小写的属性映射
+   */
   public Reflector(Class<?> clazz) {
     type = clazz;
     addDefaultConstructor(clazz);
     Method[] classMethods = getClassMethods(clazz);
+    // Record类型处理方法
     if (isRecord(type)) {
       addRecordGetMethods(classMethods);
     } else {
+      // 识别所有get
       addGetMethods(classMethods);
+      // 识别所有set
       addSetMethods(classMethods);
+      // 没有方法的字段,作为属性处理
       addFields(clazz);
     }
+    // 提取可读属性名列表
     readablePropertyNames = getMethods.keySet().toArray(new String[0]);
+    // 提取可写属性名列表
     writablePropertyNames = setMethods.keySet().toArray(new String[0]);
+
+    // 大小写不敏感映射
     for (String propName : readablePropertyNames) {
       caseInsensitivePropertyMap.put(propName.toUpperCase(Locale.ENGLISH), propName);
     }
@@ -91,6 +102,9 @@ public class Reflector {
       .forEach(m -> addGetMethod(m.getName(), m, false));
   }
 
+  /**
+   * 添加无参构造
+   */
   private void addDefaultConstructor(Class<?> clazz) {
     Constructor<?>[] constructors = clazz.getDeclaredConstructors();
     Arrays.stream(constructors).filter(constructor -> constructor.getParameterTypes().length == 0)
@@ -281,7 +295,7 @@ public class Reflector {
    * declared in this class and any superclass.
    * We use this method, instead of the simpler <code>Class.getMethods()</code>,
    * because we want to look for private methods as well.
-   *
+   * 获取类方法
    * @param clazz The class
    * @return An array containing all methods in this class
    */
@@ -293,11 +307,12 @@ public class Reflector {
 
       // we also need to look for interface methods -
       // because the class may be abstract
+      // 获取接口方法,寻找继承的抽象类方法
       Class<?>[] interfaces = currentClass.getInterfaces();
       for (Class<?> anInterface : interfaces) {
         addUniqueMethods(uniqueMethods, anInterface.getMethods());
       }
-
+      // 向上寻找,直到为obj为止
       currentClass = currentClass.getSuperclass();
     }
 
@@ -306,8 +321,10 @@ public class Reflector {
     return methods.toArray(new Method[0]);
   }
 
+
   private void addUniqueMethods(Map<String, Method> uniqueMethods, Method[] methods) {
     for (Method currentMethod : methods) {
+      // 非桥接方法(不是自动生成的方法,无泛型类型擦除,无协变返回类型)
       if (!currentMethod.isBridge()) {
         String signature = getSignature(currentMethod);
         // check to see if the method is already known
@@ -320,6 +337,9 @@ public class Reflector {
     }
   }
 
+  /**
+   * 返回方法,格式[ returnType#methodName:param1,param2...]
+   */
   private String getSignature(Method method) {
     StringBuilder sb = new StringBuilder();
     Class<?> returnType = method.getReturnType();

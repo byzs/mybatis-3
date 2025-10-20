@@ -92,6 +92,7 @@ public class XMLConfigBuilder extends BaseBuilder {
   }
 
   public Configuration parse() {
+    // 只能初始化一次
     if (parsed) {
       throw new BuilderException("Each XMLConfigBuilder can only be used once.");
     }
@@ -100,35 +101,65 @@ public class XMLConfigBuilder extends BaseBuilder {
     return configuration;
   }
 
+  /**
+   * 配置文件解析
+   */
   private void parseConfiguration(XNode root) {
     try {
       // issue #117 read properties first
+
+      /**
+       *  <properties> 解析, 为后续配置提供变量替换支持
+       */
       propertiesElement(root.evalNode("properties"));
+
+      /**
+       * <setting> 解析,  将setting转换为 properties对象
+       * 加载自定义 VFS（虚拟文件系统）
+       * 加载自定义 日志实现
+       */
       Properties settings = settingsAsProperties(root.evalNode("settings"));
       loadCustomVfs(settings);
       loadCustomLogImpl(settings);
+
+      // 别名解析
       typeAliasesElement(root.evalNode("typeAliases"));
+      // 插件解析
       pluginElement(root.evalNode("plugins"));
+      // 对象工厂
       objectFactoryElement(root.evalNode("objectFactory"));
+      // 对象包装工厂
       objectWrapperFactoryElement(root.evalNode("objectWrapperFactory"));
+      // 反射器工厂
       reflectorFactoryElement(root.evalNode("reflectorFactory"));
+
+      // 应用配置解析  对象工厂等需要在 settings 之前初始化
       settingsElement(settings);
       // read it after objectFactory and objectWrapperFactory issue #631
+      // 环境配置解析
       environmentsElement(root.evalNode("environments"));
+      // 数据库环境配置解析
       databaseIdProviderElement(root.evalNode("databaseIdProvider"));
+      // 类型转换处理
       typeHandlerElement(root.evalNode("typeHandlers"));
+      // SQL 映射
       mapperElement(root.evalNode("mappers"));
     } catch (Exception e) {
+
       throw new BuilderException("Error parsing SQL Mapper Configuration. Cause: " + e, e);
     }
   }
 
+  /**
+   * <setting> 解析
+   */
   private Properties settingsAsProperties(XNode context) {
     if (context == null) {
       return new Properties();
     }
     Properties props = context.getChildrenAsProperties();
     // Check that all settings are known to the configuration class
+    // 缓存配置类
     MetaClass metaConfig = MetaClass.forClass(Configuration.class, localReflectorFactory);
     for (Object key : props.keySet()) {
       if (!metaConfig.hasSetter(String.valueOf(key))) {
@@ -219,11 +250,18 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
   }
 
+  /**
+   * 属性的解析
+   *   存在优先级, properties -> resource -> ulr 同名属性会被覆盖
+   */
   private void propertiesElement(XNode context) throws Exception {
     if (context != null) {
+
       Properties defaults = context.getChildrenAsProperties();
+      // 增加外部引入的变量
       String resource = context.getStringAttribute("resource");
       String url = context.getStringAttribute("url");
+      // 不允许同时存在
       if (resource != null && url != null) {
         throw new BuilderException("The properties element cannot specify both a URL and a resource based property file reference.  Please specify one or the other.");
       }
@@ -232,6 +270,7 @@ public class XMLConfigBuilder extends BaseBuilder {
       } else if (url != null) {
         defaults.putAll(Resources.getUrlAsProperties(url));
       }
+      // 合并变量
       Properties vars = configuration.getVariables();
       if (vars != null) {
         defaults.putAll(vars);
@@ -363,29 +402,42 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
   }
 
+  /**
+   * 注册mapper
+   */
   private void mapperElement(XNode parent) throws Exception {
     if (parent != null) {
       for (XNode child : parent.getChildren()) {
+        /**
+         * <package name="com.example.mapper"/>
+         * 使用反射扫描包路径，为每个接口创建 MapperAnnotationBuilder
+         */
         if ("package".equals(child.getName())) {
           String mapperPackage = child.getStringAttribute("name");
           configuration.addMappers(mapperPackage);
         } else {
+          /**
+           * 不同的加载方式,对应不同的方法; 只能且有一种方式进行加载,因为多方式下不知道以哪个方式为准
+           */
           String resource = child.getStringAttribute("resource");
           String url = child.getStringAttribute("url");
           String mapperClass = child.getStringAttribute("class");
           if (resource != null && url == null && mapperClass == null) {
+            // 设置错误上下文信息,使用XML解析转换指定数据
             ErrorContext.instance().resource(resource);
             try(InputStream inputStream = Resources.getResourceAsStream(resource)) {
               XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, resource, configuration.getSqlFragments());
               mapperParser.parse();
             }
           } else if (resource == null && url != null && mapperClass == null) {
+            // 设置错误上下文信息,使用XML解析转换指定数据
             ErrorContext.instance().resource(url);
             try(InputStream inputStream = Resources.getUrlAsStream(url)){
               XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, url, configuration.getSqlFragments());
               mapperParser.parse();
             }
           } else if (resource == null && url == null && mapperClass != null) {
+            // 直接注册 Mapper 接口类
             Class<?> mapperInterface = Resources.classForName(mapperClass);
             configuration.addMapper(mapperInterface);
           } else {

@@ -32,11 +32,13 @@ public class MapUtil {
     if (value != null) {
       return value;
     }
+    // computeIfAbsent 不存在则创建
     return map.computeIfAbsent(key, mappingFunction);
   }
 
   /**
    * Map.entry(key, value) alternative for Java 8.
+   * AbstractMap.SimpleImmutableEntry 创建不可变键值对
    */
   public static <K, V> Entry<K, V> entry(K key, V value) {
     return new AbstractMap.SimpleImmutableEntry<>(key, value);
