@@ -17,6 +17,7 @@ package org.apache.ibatis.scripting.xmltags;
 
 /**
  * @author Frank D. Martinez [mnesarco]
+ * 处理 <bind> 标签，创建变量并绑定到上下文
  */
 public class VarDeclSqlNode implements SqlNode {
 

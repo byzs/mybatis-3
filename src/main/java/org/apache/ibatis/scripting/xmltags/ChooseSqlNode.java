@@ -19,6 +19,7 @@ import java.util.List;
 
 /**
  * @author Clinton Begin
+ * 处理 <choose>, <when>, <otherwise> 标签，实现 if-else 逻辑
  */
 public class ChooseSqlNode implements SqlNode {
   private final SqlNode defaultSqlNode;

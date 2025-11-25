@@ -22,6 +22,8 @@ import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin
+ * 负责运行时确定的动态SQL
+ * 处理包含动态SQL标签（如<if>、<where>）或${}占位符的SQL
  */
 public class DynamicSqlSource implements SqlSource {
 
@@ -35,12 +37,18 @@ public class DynamicSqlSource implements SqlSource {
 
   @Override
   public BoundSql getBoundSql(Object parameterObject) {
+    // 1. 创建 DynamicContext
     DynamicContext context = new DynamicContext(configuration, parameterObject);
+    // 2. 解析 Sql 片段
     rootSqlNode.apply(context);
+    // 3. 创建 SqlSourceBuilder
     SqlSourceBuilder sqlSourceParser = new SqlSourceBuilder(configuration);
     Class<?> parameterType = parameterObject == null ? Object.class : parameterObject.getClass();
+    // 4. 解析转换
     SqlSource sqlSource = sqlSourceParser.parse(context.getSql(), parameterType, context.getBindings());
+    // 5. 获取 BoundSql
     BoundSql boundSql = sqlSource.getBoundSql(parameterObject);
+    // 6. 将 DynamicContext的内容拷贝到 boundSql中
     context.getBindings().forEach(boundSql::setAdditionalParameter);
     return boundSql;
   }

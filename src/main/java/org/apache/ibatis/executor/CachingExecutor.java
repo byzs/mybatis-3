@@ -84,7 +84,9 @@ public class CachingExecutor implements Executor {
 
   @Override
   public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler) throws SQLException {
+    // 1. 解析sql
     BoundSql boundSql = ms.getBoundSql(parameterObject);
+    // 2. 创建缓存
     CacheKey key = createCacheKey(ms, parameterObject, rowBounds, boundSql);
     return query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
   }
@@ -96,10 +98,12 @@ public class CachingExecutor implements Executor {
     if (cache != null) {
       flushCacheIfRequired(ms);
       if (ms.isUseCache() && resultHandler == null) {
+        // 缓存安全检查
         ensureNoOutParams(ms, boundSql);
         @SuppressWarnings("unchecked")
         List<E> list = (List<E>) tcm.getObject(cache, key);
         if (list == null) {
+          // 未命中缓存
           list = delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
           tcm.putObject(cache, key, list); // issue #578 and #116
         }
@@ -131,6 +135,9 @@ public class CachingExecutor implements Executor {
     }
   }
 
+  /**
+   * 缓存的安全检查,储存过程的 [输出参数,输入输出参数] 不可以缓存
+   */
   private void ensureNoOutParams(MappedStatement ms, BoundSql boundSql) {
     if (ms.getStatementType() == StatementType.CALLABLE) {
       for (ParameterMapping parameterMapping : boundSql.getParameterMappings()) {
@@ -161,6 +168,9 @@ public class CachingExecutor implements Executor {
     delegate.clearLocalCache();
   }
 
+  /**
+   * 缓存刷新
+   */
   private void flushCacheIfRequired(MappedStatement ms) {
     Cache cache = ms.getCache();
     if (cache != null && ms.isFlushCacheRequired()) {

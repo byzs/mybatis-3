@@ -24,6 +24,8 @@ import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin
+ * 是SQL在MyBatis内部的最终静态表示
+ * 作为DynamicSqlSource和RawSqlSource解析后的最终结果，持有已解析完成的SQL
  */
 public class StaticSqlSource implements SqlSource {
 

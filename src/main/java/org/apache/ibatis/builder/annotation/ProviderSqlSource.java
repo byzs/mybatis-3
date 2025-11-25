@@ -32,6 +32,9 @@ import org.apache.ibatis.session.Configuration;
 /**
  * @author Clinton Begin
  * @author Kazuki Shimizu
+ *
+ * 负责通过注解 provider 方法生成的SQL
+ * 理通过@SelectProvider、@InsertProvider等注解配置的SQL
  */
 public class ProviderSqlSource implements SqlSource {
 

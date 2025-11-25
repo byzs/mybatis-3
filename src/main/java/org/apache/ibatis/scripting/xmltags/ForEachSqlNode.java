@@ -23,6 +23,7 @@ import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin
+ * 处理 <foreach> 标签，遍历集合并生成重复的 SQL 片段
  */
 public class ForEachSqlNode implements SqlNode {
   public static final String ITEM_PREFIX = "__frch_";

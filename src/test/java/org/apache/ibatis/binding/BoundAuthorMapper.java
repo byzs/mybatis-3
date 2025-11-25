@@ -177,7 +177,6 @@ public interface BoundAuthorMapper {
                                     RowBounds rowBounds,
                                     @Param("two") int two,
                                     int three);
-
   @Flush
   List<BatchResult> flush();
 

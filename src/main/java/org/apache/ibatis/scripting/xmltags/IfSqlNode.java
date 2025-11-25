@@ -17,6 +17,7 @@ package org.apache.ibatis.scripting.xmltags;
 
 /**
  * @author Clinton Begin
+ * 处理 <if> 标签，根据 OGNL 表达式决定是否包含 SQL 片段
  */
 public class IfSqlNode implements SqlNode {
   private final ExpressionEvaluator evaluator;
@@ -31,6 +32,7 @@ public class IfSqlNode implements SqlNode {
 
   @Override
   public boolean apply(DynamicContext context) {
+    // 表达式成立则应用
     if (evaluator.evaluateBoolean(test, context.getBindings())) {
       contents.apply(context);
       return true;

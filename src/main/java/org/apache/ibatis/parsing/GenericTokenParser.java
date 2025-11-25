@@ -31,10 +31,12 @@ public class GenericTokenParser {
   }
 
   public String parse(String text) {
+    // 非空检查
     if (text == null || text.isEmpty()) {
       return "";
     }
     // search open token
+    // 判断 openToken位置
     int start = text.indexOf(openToken);
     if (start == -1) {
       return text;
@@ -43,7 +45,10 @@ public class GenericTokenParser {
     int offset = 0;
     final StringBuilder builder = new StringBuilder();
     StringBuilder expression = null;
+
+    // 循环解析
     do {
+      // 删除转义符
       if (start > 0 && src[start - 1] == '\\') {
         // this open token is escaped. remove the backslash and continue.
         builder.append(src, offset, start - offset - 1).append(openToken);
@@ -80,6 +85,7 @@ public class GenericTokenParser {
       }
       start = text.indexOf(openToken, offset);
     } while (start > -1);
+
     if (offset < src.length) {
       builder.append(src, offset, src.length - offset);
     }

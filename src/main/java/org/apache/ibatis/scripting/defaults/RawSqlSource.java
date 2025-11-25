@@ -31,6 +31,8 @@ import org.apache.ibatis.session.Configuration;
  *
  * @since 3.2.0
  * @author Eduardo Macarron
+ * 负责启动时确定的静态SQL，性能更高。
+ * 处理不包含动态SQL标签，且通常使用#{}占位符的静态SQL
  */
 public class RawSqlSource implements SqlSource {
 

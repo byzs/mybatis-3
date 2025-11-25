@@ -80,9 +80,11 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
   @Override
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     try {
+      // 1. 处理 Object 类的原生方法 toString(), hashCode(), equals(), getClass()等 直接在代理上调用,避免将这些方法误认为数据库操作
       if (Object.class.equals(method.getDeclaringClass())) {
         return method.invoke(this, args);
       } else {
+        // 2. 处理 mapper方法调度
         return cachedInvoker(method).invoke(proxy, method, args, sqlSession);
       }
     } catch (Throwable t) {
@@ -90,14 +92,20 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
     }
   }
 
+
+
   private MapperMethodInvoker cachedInvoker(Method method) throws Throwable {
     try {
+      // 缓存机制
       return MapUtil.computeIfAbsent(methodCache, method, m -> {
         if (m.isDefault()) {
+          // 默认方法处理
           try {
             if (privateLookupInMethod == null) {
+              // java8
               return new DefaultMethodInvoker(getMethodHandleJava8(method));
             } else {
+              // java9 引入了模块系统，反射 API 发生变化
               return new DefaultMethodInvoker(getMethodHandleJava9(method));
             }
           } catch (IllegalAccessException | InstantiationException | InvocationTargetException
@@ -105,6 +113,7 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
             throw new RuntimeException(e);
           }
         } else {
+          // 普通 Mapper方法
           return new PlainMethodInvoker(new MapperMethod(mapperInterface, method, sqlSession.getConfiguration()));
         }
       });
@@ -124,6 +133,7 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
 
   private MethodHandle getMethodHandleJava8(Method method)
       throws IllegalAccessException, InstantiationException, InvocationTargetException {
+
     final Class<?> declaringClass = method.getDeclaringClass();
     return lookupConstructor.newInstance(declaringClass, ALLOWED_MODES).unreflectSpecial(method, declaringClass);
   }

@@ -106,6 +106,11 @@ public class TypeParameterResolver {
    * @return 解析后的类型
    */
   private static Type resolveType(Type type, Type srcType, Class<?> declaringClass) {
+    /**
+     * TypeVariable 表示泛型类型参数，即在类或方法声明中使用的类型参数（如 T、K、V）
+     * ParameterizedType 表示参数化类型，即带有实际类型参数的泛型类型（如 List<String>、Map<Integer, String>）
+     * GenericArrayType 表示泛型数组类型，即组件类型是参数化类型或类型变量的数组（如 T[]、List<String>[]）
+     */
     if (type instanceof TypeVariable) {
       return resolveTypeVar((TypeVariable<?>) type, srcType, declaringClass);
     } else if (type instanceof ParameterizedType) {
@@ -177,6 +182,7 @@ public class TypeParameterResolver {
   private static Type resolveTypeVar(TypeVariable<?> typeVar, Type srcType, Class<?> declaringClass) {
     Type result;
     Class<?> clazz;
+    // 1.提取原始类
     if (srcType instanceof Class) {
       clazz = (Class<?>) srcType;
     } else if (srcType instanceof ParameterizedType) {
@@ -186,6 +192,7 @@ public class TypeParameterResolver {
       throw new IllegalArgumentException("The 2nd arg must be Class or ParameterizedType, but was: " + srcType.getClass());
     }
 
+    // 2.直接匹配声明类
     if (clazz == declaringClass) {
       Type[] bounds = typeVar.getBounds();
       if (bounds.length > 0) {
@@ -194,12 +201,14 @@ public class TypeParameterResolver {
       return Object.class;
     }
 
+    // 3.搜索父类
     Type superclass = clazz.getGenericSuperclass();
     result = scanSuperTypes(typeVar, srcType, declaringClass, clazz, superclass);
     if (result != null) {
       return result;
     }
 
+    // 4.搜索接口
     Type[] superInterfaces = clazz.getGenericInterfaces();
     for (Type superInterface : superInterfaces) {
       result = scanSuperTypes(typeVar, srcType, declaringClass, clazz, superInterface);

@@ -114,7 +114,7 @@ public class MapperRegistry {
    * @param packageName
    *          the package name
    *
-   *          
+   *
    * @since 3.2.2
    */
   public void addMappers(String packageName) {

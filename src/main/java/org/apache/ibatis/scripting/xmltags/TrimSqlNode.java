@@ -26,6 +26,7 @@ import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin
+ * 处理 <trim>, <where>, <set> 标签，智能添加/移除前缀后缀
  */
 public class TrimSqlNode implements SqlNode {
 

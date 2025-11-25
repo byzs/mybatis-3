@@ -24,6 +24,7 @@ import org.apache.ibatis.type.SimpleTypeRegistry;
 
 /**
  * @author Clinton Begin
+ * 处理包含 ${} 占位符的动态文本
  */
 public class TextSqlNode implements SqlNode {
   private final String text;

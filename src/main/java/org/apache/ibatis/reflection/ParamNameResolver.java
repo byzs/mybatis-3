@@ -56,12 +56,15 @@ public class ParamNameResolver {
 
   public ParamNameResolver(Configuration config, Method method) {
     this.useActualParamName = config.isUseActualParamName();
+    // 参数类型列表
     final Class<?>[] paramTypes = method.getParameterTypes();
+    // 参数注解列表
     final Annotation[][] paramAnnotations = method.getParameterAnnotations();
     final SortedMap<Integer, String> map = new TreeMap<>();
     int paramCount = paramAnnotations.length;
     // get names from @Param annotations
     for (int paramIndex = 0; paramIndex < paramCount; paramIndex++) {
+      // 排除分页参数
       if (isSpecialParameter(paramTypes[paramIndex])) {
         // skip special parameters
         continue;
@@ -82,6 +85,7 @@ public class ParamNameResolver {
         if (name == null) {
           // use the parameter index as the name ("0", "1", ...)
           // gcode issue #71
+          // 无注解 就用参数的 index 替代
           name = String.valueOf(map.size());
         }
       }
@@ -122,11 +126,14 @@ public class ParamNameResolver {
   public Object getNamedParams(Object[] args) {
     final int paramCount = names.size();
     if (args == null || paramCount == 0) {
+      // 没有参数
       return null;
     } else if (!hasParamAnnotation && paramCount == 1) {
+      // 一个参数
       Object value = args[names.firstKey()];
       return wrapToMapIfCollection(value, useActualParamName ? names.get(0) : null);
     } else {
+      // 多个参数
       final Map<String, Object> param = new ParamMap<>();
       int i = 0;
       for (Map.Entry<Integer, String> entry : names.entrySet()) {

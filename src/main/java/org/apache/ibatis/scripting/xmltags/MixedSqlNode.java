@@ -19,6 +19,8 @@ import java.util.List;
 
 /**
  * @author Clinton Begin
+ * 混合容器
+ * 组合多个 SqlNode 并按顺序应用
  */
 public class MixedSqlNode implements SqlNode {
   private final List<SqlNode> contents;
