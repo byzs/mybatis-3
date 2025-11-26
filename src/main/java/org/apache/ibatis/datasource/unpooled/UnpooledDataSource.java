@@ -35,6 +35,7 @@ import org.apache.ibatis.io.Resources;
 /**
  * @author Clinton Begin
  * @author Eduardo Macarron
+ * 没有池的链接
  */
 public class UnpooledDataSource implements DataSource {
 
